@@ -1,0 +1,7 @@
+[submodule "torch-mlir"]
+	path = torch-mlir
+	url = https://github.com/llvm/torch-mlir
+[submodule "mlir-dace"]
+	path = mlir-dace
+	url = https://github.com/spcl/mlir-dace
+	branch = to-sdir-converter
