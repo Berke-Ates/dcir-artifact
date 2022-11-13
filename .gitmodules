@@ -5,3 +5,9 @@
 	path = mlir-dace
 	url = https://github.com/spcl/mlir-dace
 	branch = to-sdir-converter
+[submodule "mlir-hlo"]
+	path = mlir-hlo
+	url = https://github.com/tensorflow/mlir-hlo
+[submodule "dace"]
+	path = dace
+	url = https://github.com/spcl/dace
