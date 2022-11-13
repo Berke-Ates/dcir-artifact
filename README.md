@@ -2,7 +2,7 @@
 
 ## Check out the code
 ```sh
-git clone <URL>
+git clone [--recurse-submodules] --depth 1 --shallow-submodules <URL>
 cd dcir-artifact
 ```
 
@@ -26,3 +26,5 @@ and a running instance of the Docker daemon.
 The requirements for a manual setup are listed in the `Dockerfile`.
 
 # Running
+
+# File Structure
