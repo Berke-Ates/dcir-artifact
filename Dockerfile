@@ -19,7 +19,6 @@ ENV TERM=xterm-color
 # Install dependencies
 RUN apt update -y && \ 
   apt install -y \
-  command-not-found \
   git \
   cmake \
   ninja-build \
@@ -28,7 +27,7 @@ RUN apt update -y && \
   python3-pip
 
 # Update command-not-found database and launch bash shell at home
-ENTRYPOINT apt -qq update && cd $HOME && bash
+ENTRYPOINT cd $HOME && bash
 
 # Copy all files
 COPY . .
@@ -40,18 +39,8 @@ RUN git submodule update --init --recursive --depth 1
 ### Install DaCe
 ################################################################################
 
-# TODO: Maybe use `pip install --editable .` instead?
-
-# Install python dependencies
 WORKDIR $HOME/dace
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
-
-# Run setup
-RUN python3 setup.py
-
-# Add python packages to PYTHONPATH
-ENV PYTHONPATH=$PWD:$PYTHONPATH
+RUN pip install --editable .
 
 ################################################################################
 ### Install mlir-dace
@@ -146,7 +135,7 @@ WORKDIR $HOME/mlir-hlo
 
 RUN build_tools/build_mlir.sh ${PWD}/llvm-project/ ${PWD}/llvm-build
 
-WORKDIR /home/mlir-hlo/build
+WORKDIR $HOME/mlir-hlo/build
 
 RUN cmake .. -GNinja \
   -DLLVM_ENABLE_LLD=ON \
