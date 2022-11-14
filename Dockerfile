@@ -26,7 +26,7 @@ RUN apt update -y && \
   lld \
   python3-pip
 
-# Update command-not-found database and launch bash shell at home
+# Launch bash shell at home
 ENTRYPOINT cd $HOME && bash
 
 # Copy all files
@@ -147,3 +147,22 @@ RUN ninja
 
 # Add binaries to PATH
 ENV PATH=$HOME/mlir-hlo/build/bin:$PATH
+
+################################################################################
+### Install Polygeist
+################################################################################
+
+WORKDIR $HOME/Polygeist/build
+
+RUN cmake -G Ninja ../llvm-project/llvm \
+  -DLLVM_ENABLE_PROJECTS="clang;mlir" \
+  -DLLVM_EXTERNAL_PROJECTS="polygeist" \
+  -DLLVM_EXTERNAL_POLYGEIST_SOURCE_DIR=.. \
+  -DLLVM_TARGETS_TO_BUILD="host" \
+  -DLLVM_ENABLE_ASSERTIONS=ON \
+  -DCMAKE_BUILD_TYPE=Release
+
+RUN ninja
+
+# Add binaries to PATH
+ENV PATH=$HOME/Polygeist/build/bin:$PATH

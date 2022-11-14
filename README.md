@@ -9,11 +9,11 @@ cd dcir-artifact
 ## Docker
 ### Build the container
 ```sh
-sudo docker build -t dcir .
+sudo docker build -t dcir-cgo23 .
 ```
 ### Run the container
 ```sh
-sudo docker run -it --rm dcir
+sudo docker run -it --rm dcir-cgo23
 ```
 
 ## Manual Setup
