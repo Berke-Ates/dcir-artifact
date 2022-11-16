@@ -5,14 +5,13 @@
 
 import sys
 import dace
-from dace.transformation.passes.scalar_to_symbol import promote_scalars_to_symbols
 from dace.transformation.auto.auto_optimize import auto_optimize, move_small_arrays_to_stack
 from dace.transformation.interstate import StateFusion
 from dace.transformation.passes.optional_arrays import OptionalArrayInference
 from dace.transformation.passes.constant_propagation import ConstantPropagation
 from dace import SDFG
 
-if len(sys.argv) != 4:
+if len(sys.argv) != 5:
     print("SDFG Optimizing Tool")
     print("Arguments:")
     print("  Input SDFG: The SDFG to optimize")
@@ -34,7 +33,6 @@ sdfg = SDFG.from_file(input_file)
 sdfg.validate()
 
 # Apply Optimizations
-
 if opt_lvl == 1:
     for i in range(5):
         OptionalArrayInference().apply_pass(sdfg, dict())
