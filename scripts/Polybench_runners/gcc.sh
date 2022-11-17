@@ -48,7 +48,7 @@ add_csv(){
     echo '' >> $timings_file
   done
 
-  if [ ! -z $(sed "${csv_line}q;d" $timings_file) ]; then
+  if [ ! -z "$(sed "${csv_line}q;d" $timings_file)" ]; then
     sed -i "${csv_line}s/$/,/" $timings_file
   fi
 
@@ -87,7 +87,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # Running the benchmark
-add_csv "gcc"
+add_csv "GCC"
 
 for i in $(seq 1 $repetitions); do
   time=$(./$output_dir/${input_name}_gcc.out)
