@@ -32,6 +32,7 @@ ENTRYPOINT cd $HOME && bash
 # Install python dependencies
 RUN pip install --upgrade pip
 RUN pip install --upgrade "jax[cpu]"
+RUN pip install --upgrade seaborn
 
 # Copy scripts
 WORKDIR $HOME/scripts
@@ -61,4 +62,4 @@ COPY --from=base $HOME/mlir-hlo/build/bin/mlir-hlo-opt ./
 COPY --from=base $HOME/Polygeist/build/bin/cgeist ./
 COPY --from=base $HOME/Polygeist/build/bin/polygeist-opt ./
 
-ENV PATH=$PWD:$PATH
+ENV PATH=$HOME/bin:$PATH
