@@ -35,6 +35,10 @@ COPY . .
 # Make sure submodules are initialized
 RUN git submodule update --init --recursive --depth 1
 
+# Dependencies for plotting
+RUN pip install --upgrade pip
+RUN pip install --upgrade seaborn
+
 ################################################################################
 ### Install DaCe
 ################################################################################
