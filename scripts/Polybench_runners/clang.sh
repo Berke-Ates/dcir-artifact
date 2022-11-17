@@ -44,7 +44,7 @@ actual=$output_dir/${input_name}_actual_clang.txt
 # Adds a value to the timings file, jumps to the next row after a write
 csv_line=1
 add_csv(){
-  while [[ $(grep -c ^ gen/2mm_timings.csv) < $csv_line ]]; do
+  while [[ $(grep -c ^ $timings_file) < $csv_line ]]; do
     echo '' >> $timings_file
   done
 
