@@ -14,3 +14,6 @@
 [submodule "Polygeist"]
 	path = Polygeist
 	url = https://github.com/llvm/Polygeist
+[submodule "polybench-comparator"]
+	path = polybench-comparator
+	url = https://github.com/spcl/polybench-comparator
