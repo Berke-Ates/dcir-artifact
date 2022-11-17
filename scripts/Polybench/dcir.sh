@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Desc: Runs a Polybench benchmark using DCIR. The output contains any
-#       intermediate results and the times int the CSV format
+#       intermediate results and the times in the CSV format
 # Usage: ./dcir.sh <Benchmark File> <Output Dir> <Repetitions>
 
 # Check args
@@ -13,7 +13,7 @@ fi
 # Read args
 input_file=$1
 output_dir=$2
-reps=$3
+repetitions=$3
 
 # Check tools
 check_tool(){
@@ -30,19 +30,37 @@ check_tool mlir-opt
 check_tool sdfg-opt
 check_tool python3
 
-# Helpers
-input_name=$(basename ${input_file%.*})
-input_dir=$(dirname $input_file)
-utils_dir=$input_dir/../utilities
-scripts_dir=$(dirname $0)/..
-
 # Create output directory
 if [ ! -d $output_dir ]; then
   mkdir -p $output_dir;
 fi
 
+# Helpers
+input_name=$(basename ${input_file%.*})
+input_dir=$(dirname $input_file)
+utils_dir=$input_dir/../utilities
+scripts_dir=$(dirname $0)/..
+timings_file=$output_dir/${input_name}_timings.csv; touch $timings_file
+reference=$output_dir/${input_name}_reference.txt
+actual=$output_dir/${input_name}_actual_gcc.txt
+
+# Adds a value to the timings file, jumps to the next row after a write
+csv_line=1
+add_csv(){
+  while [[ $(grep -c ^ $timings_file) < $csv_line ]]; do
+    echo '' >> $timings_file
+  done
+
+  if [ ! -z "$(sed "${csv_line}q;d" $timings_file)" ]; then
+    sed -i "${csv_line}s/$/,/" $timings_file
+  fi
+
+  sed -i "${csv_line}s/$/$1/" "$timings_file"
+  csv_line=$((csv_line+1))
+}
+
 # Flags for the benchmark
-flags="-DMINI_DATASET -DDATA_TYPE_IS_DOUBLE -DPOLYBENCH_DUMP_ARRAYS -fPIC -march=native"
+flags="-DLARGE_DATASET -DDATA_TYPE_IS_DOUBLE -DPOLYBENCH_DUMP_ARRAYS -fPIC -march=native"
 opt_lvl_cc=3 # Optimization level for the control-centric optimizations
 opt_lvl_dc=3 # Optimization level for the data-centric optimizations
 
@@ -91,4 +109,22 @@ sdfg-translate --mlir-to-sdfg $output_dir/${input_name}_sdfg.mlir \
 python3 $scripts_dir/opt_sdfg.py $output_dir/$input_name.sdfg \
   $output_dir/${input_name}_opt.sdfg $opt_lvl_dc T
 
+# Check output
+python3 $scripts_dir/bench_sdfg.py $output_dir/${input_name}_opt.sdfg 1 T
 
+# clang -I $utils_dir -O0 $flags -DPOLYBENCH_DUMP_ARRAYS -lm \
+#   -o $output_dir/${input_name}_clang_ref.out $input_file $utils_dir/polybench.c
+
+# $output_dir/${input_name}_gcc_dump.out 2> $actual 1> /dev/null
+# $output_dir/${input_name}_clang_ref.out 2> $reference 1> /dev/null
+
+# python3 $scripts_dir/../polybench-comparator/comparator.py $reference $actual
+
+# if [ $? -ne 0 ]; then
+#   echo "Output incorrect!"
+#   exit 1
+# fi
+
+# # Running the benchmark
+# python3 $scripts_dir/bench_sdfg.py $output_dir/${input_name}_opt.sdfg \
+#   $repetitions F
