@@ -126,5 +126,5 @@ python3 $scripts_dir/bench_sdfg.py $output_dir/${input_name}_opt.sdfg 1 T
 # fi
 
 # # Running the benchmark
-# python3 $scripts_dir/bench_sdfg.py $output_dir/${input_name}_opt.sdfg \
+# python3 $(dirname $0)/bench_sdfg.py $output_dir/${input_name}_opt.sdfg \
 #   $repetitions F
