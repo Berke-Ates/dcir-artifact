@@ -70,11 +70,11 @@ clang -I $utils_dir -O$opt_lvl_cc $flags -o $output_dir/${input_name}_clang.out 
   $input_file $utils_dir/polybench.c -lm
 
 # Check output
-clang -I $utils_dir -O$opt_lvl_cc $flags -DPOLYBENCH_DUMP_ARRAYS -lm \
-  -o $output_dir/${input_name}_clang_dump.out $input_file $utils_dir/polybench.c
+clang -I $utils_dir -O$opt_lvl_cc $flags -DPOLYBENCH_DUMP_ARRAYS \
+  -o $output_dir/${input_name}_clang_dump.out $input_file $utils_dir/polybench.c -lm
 
-gcc -I $utils_dir -O0 $flags -DPOLYBENCH_DUMP_ARRAYS -lm \
-  -o $output_dir/${input_name}_gcc_ref.out $input_file $utils_dir/polybench.c
+gcc -I $utils_dir -O0 $flags -DPOLYBENCH_DUMP_ARRAYS \
+  -o $output_dir/${input_name}_gcc_ref.out $input_file $utils_dir/polybench.c -lm
 
 $output_dir/${input_name}_clang_dump.out 2> $actual 1> /dev/null
 $output_dir/${input_name}_gcc_ref.out 2> $reference 1> /dev/null
