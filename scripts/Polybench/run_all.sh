@@ -59,3 +59,13 @@ for runner in $runners; do
 
   echo ""
 done
+
+csv_files=()
+
+for benchmark in $benchmarks; do
+    bname="$(basename $benchmark .c)"
+    mv "$output_dir/${bname}_timings.csv" "$output_dir/${bname}.csv"
+    csv_files+=("$output_dir/${bname}.csv")
+done
+
+python3 $scripts_dir/multi_plot.py ${csv_files[*]} $output_dir/polybench.pdf
