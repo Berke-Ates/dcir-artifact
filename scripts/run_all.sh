@@ -14,6 +14,11 @@ fi
 output_dir=$1
 repetitions=$2
 
+# Create output directory
+if [ ! -d $output_dir ]; then
+  mkdir -p $output_dir;
+fi
+
 # Helpers
 scripts_dir=$(dirname $0)
 
