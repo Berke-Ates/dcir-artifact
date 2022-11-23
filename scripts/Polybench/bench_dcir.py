@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 
-# Desc: Runs a Polybench SDFG benchmark
-# Usage: ./bench_sdfg.py <Input SDFG> <Repetitions> <Print Output (T/F)>
+# Desc: Runs a Polybench SDFG benchmark for DCIR
+# Usage: ./bench_dcir.py <Input SDFG> <Repetitions> <Print Output (T/F)>
 
 import sys
 import dace
 
 if len(sys.argv) != 4:
-    print("SDFG Polybench Benchmarking Tool")
+    print("DCIR Polybench Benchmarking Tool")
     print("Arguments:")
     print("  Input SDFG: The SDFG to benchmark")
     print("  Repetitions: How many times to run the benchmark")
@@ -105,7 +105,3 @@ if print_output:
         print("\nend   dump: %s" % argName, file=sys.stderr)
 
     print("==END   DUMP_ARRAYS==", file=sys.stderr)
-
-# Print timing
-for event in sdfg.get_latest_report()['traceEvents']:
-    print(event['dur'] / (1000 * 1000))

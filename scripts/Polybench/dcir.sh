@@ -39,6 +39,7 @@ fi
 input_name=$(basename ${input_file%.*})
 input_dir=$(dirname $input_file)
 utils_dir=$input_dir/../utilities
+current_dir=$(dirname $0)
 scripts_dir=$(dirname $0)/..
 timings_file=$output_dir/${input_name}_timings.csv; touch $timings_file
 reference=$output_dir/${input_name}_reference.txt
@@ -80,9 +81,9 @@ if [[ "$input_name" == "floyd-warshall" ]]; then
 fi
 
 # Dace Settings
-export DACE_compiler_cpu_executable="$(which clang++)"
-export CC=`which clang`
-export CXX=`which clang++`
+export DACE_compiler_cpu_executable="$(which g++)"
+export CC=`which gcc`
+export CXX=`which g++`
 export DACE_compiler_cpu_openmp_sections=0
 export DACE_instrumentation_report_each_invocation=0
 export DACE_compiler_cpu_args="-fPIC -O$opt_lvl_cc -march=native"
@@ -110,21 +111,54 @@ python3 $scripts_dir/opt_sdfg.py $output_dir/$input_name.sdfg \
   $output_dir/${input_name}_opt.sdfg $opt_lvl_dc T
 
 # Check output
-python3 $scripts_dir/bench_sdfg.py $output_dir/${input_name}_opt.sdfg 1 T
+clang -I $utils_dir -O0 $flags -DPOLYBENCH_DUMP_ARRAYS \
+  -o $output_dir/${input_name}_clang_ref.out $input_file $utils_dir/polybench.c -lm
 
-# clang -I $utils_dir -O0 $flags -DPOLYBENCH_DUMP_ARRAYS \
-#   -o $output_dir/${input_name}_clang_ref.out $input_file $utils_dir/polybench.c -lm
+python3 $current_dir/bench_dcir.py $output_dir/${input_name}_opt.sdfg 1 T 2> $actual 1> /dev/null
+$output_dir/${input_name}_clang_ref.out 2> $reference 1> /dev/null
 
-# $output_dir/${input_name}_gcc_dump.out 2> $actual 1> /dev/null
-# $output_dir/${input_name}_clang_ref.out 2> $reference 1> /dev/null
+## Obtain array names
+touch $output_dir/arrNames.txt
 
-# python3 $scripts_dir/../polybench-comparator/comparator.py $reference $actual
+grep "begin dump:" $reference | while read -r line ; do
+  arrTmp=($line)
+  arrName=${arrTmp[2]}
+  echo -n "$arrName " >> $output_dir/arrNames.txt
+done
 
-# if [ $? -ne 0 ]; then
-#   echo "Output incorrect!"
-#   exit 1
-# fi
+arrNames=($(cat $output_dir/arrNames.txt))
+rm $output_dir/arrNames.txt
 
-# # Running the benchmark
-# python3 $(dirname $0)/bench_sdfg.py $output_dir/${input_name}_opt.sdfg \
-#   $repetitions F
+## Remove Warnings from output
+sed -i '0,/^==BEGIN DUMP_ARRAYS==$/d' $actual
+printf '%s\n%s\n' "==BEGIN DUMP_ARRAYS==" "$(cat $actual)" > $actual
+
+## Use original array names
+idx=0
+grep "begin dump:" $actual | while read -r line ; do
+  arrTmp=($line)
+  arrName=${arrTmp[2]}
+  repArrName=${arrNames[idx]}
+  sed -i -e "s/$arrName/$repArrName/g" $actual
+  idx=$((idx+1))  
+done
+
+## Compare the outputs
+python3 $scripts_dir/../polybench-comparator/comparator.py $reference $actual
+
+if [ $? -ne 0 ]; then
+  echo "Output incorrect!"
+  exit 1
+fi
+
+# Running the benchmark
+python3 $current_dir/bench_dcir.py $output_dir/${input_name}_opt.sdfg \
+  $repetitions F
+
+add_csv "DCIR"
+
+for i in $(seq 1 $repetitions); do
+  time=$(python3 $scripts_dir/get_sdfg_times.py \
+    $output_dir/${input_name}_opt.sdfg $((i-1)))
+  add_csv "$time"
+done
