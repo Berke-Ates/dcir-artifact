@@ -117,8 +117,8 @@ RUN ninja
 
 # Add binaries to PATH
 ENV PATH=$HOME/torch-mlir/build/bin:$PATH
-ENV PYTHONPATH=$PWD/tools/torch-mlir/python_packages/torch_mlir:$PYTHONPATH
-ENV PYTHONPATH=$PWD/../examples:$PYTHONPATH
+ENV PYTHONPATH=$HOME/torch-mlir/build/tools/torch-mlir/python_packages/torch_mlir:$PYTHONPATH
+ENV PYTHONPATH=$HOME/torch-mlir/build/../examples:$PYTHONPATH
 
 ################################################################################
 ### Install mlir-hlo

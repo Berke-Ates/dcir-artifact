@@ -42,14 +42,16 @@ COPY --from=base $HOME/scripts ./
 WORKDIR $HOME/python_packages
 COPY --from=base $HOME/torch-mlir/build/tools/torch-mlir/python_packages/torch_mlir ./torch_mlir
 COPY --from=base $HOME/torch-mlir/examples ./examples
+COPY --from=base $HOME/torch-mlir/requirements.txt ./requirements.txt
+COPY --from=base $HOME/torch-mlir/pytorch-requirements.txt ./pytorch-requirements.txt
+RUN pip install -r requirements.txt
 
 WORKDIR $HOME/python_packages/dace
 COPY --from=base $HOME/dace ./
 RUN pip install --editable .
-WORKDIR $HOME/python_packages
 
-ENV PYTHONPATH=$PWD/torch_mlir:$PYTHONPATH
-ENV PYTHONPATH=$PWD/examples:$PYTHONPATH
+ENV PYTHONPATH=$HOME/python_packages/torch_mlir:$PYTHONPATH
+ENV PYTHONPATH=$HOME/python_packages/examples:$PYTHONPATH
 
 # Copy binaries
 WORKDIR $HOME/bin
@@ -63,3 +65,11 @@ COPY --from=base $HOME/Polygeist/build/bin/cgeist ./
 COPY --from=base $HOME/Polygeist/build/bin/polygeist-opt ./
 
 ENV PATH=$HOME/bin:$PATH
+
+# Copy benchmarks
+WORKDIR $HOME/benchmarks
+COPY --from=base $HOME/benchmarks ./
+
+# Copy Polybench comparator
+WORKDIR $HOME/polybench-comparator
+COPY --from=base $HOME/polybench-comparator ./
