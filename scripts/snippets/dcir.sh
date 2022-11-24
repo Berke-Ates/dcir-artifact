@@ -24,10 +24,10 @@ check_tool(){
 }
 
 check_tool clang
-check_tool clang++
 check_tool cgeist
 check_tool mlir-opt
 check_tool sdfg-opt
+check_tool sdfg-translate
 check_tool python3
 
 # Create output directory
