@@ -38,12 +38,10 @@ fi
 # Helpers
 input_name=$(basename ${input_file%.*})
 input_dir=$(dirname $input_file)
-utils_dir=$input_dir/../utilities
+input_chrono="$input_dir/$input_name-chrono.c"
 current_dir=$(dirname $0)
 scripts_dir=$(dirname $0)/..
 timings_file=$output_dir/${input_name}_timings.csv; touch $timings_file
-reference=$output_dir/${input_name}_reference.txt
-actual=$output_dir/${input_name}_actual_gcc.txt
 
 # Adds a value to the timings file, jumps to the next row after a write
 csv_line=1
@@ -61,7 +59,7 @@ add_csv(){
 }
 
 # Flags for the benchmark
-flags="-DLARGE_DATASET -DDATA_TYPE_IS_DOUBLE -DPOLYBENCH_DUMP_ARRAYS -fPIC -march=native"
+flags="-fPIC -march=native"
 opt_lvl_cc=3 # Optimization level for the control-centric optimizations
 opt_lvl_dc=3 # Optimization level for the data-centric optimizations
 
@@ -89,8 +87,8 @@ export DACE_instrumentation_report_each_invocation=0
 export DACE_compiler_cpu_args="-fPIC -O$opt_lvl_cc -march=native"
 
 # Generating MLIR from C using Polygeist
-cgeist -resource-dir=$(clang -print-resource-dir) -I $utils_dir \
-  -S --memref-fullrank -O$opt_lvl_cc --raise-scf-to-affine $flags $input_file \
+cgeist -resource-dir=$(clang -print-resource-dir) -S --memref-fullrank \
+  -O$opt_lvl_cc --raise-scf-to-affine $flags $input_file \
   > $output_dir/${input_name}_cgeist.mlir
 
 # Optimizing with MLIR
@@ -111,42 +109,13 @@ python3 $scripts_dir/opt_sdfg.py $output_dir/$input_name.sdfg \
   $output_dir/${input_name}_opt.sdfg $opt_lvl_dc T
 
 # Check output
-clang -I $utils_dir -O0 $flags -DPOLYBENCH_DUMP_ARRAYS \
-  -o $output_dir/${input_name}_clang_ref.out $input_file $utils_dir/polybench.c -lm
+actual=$(python3 $current_dir/bench_dcir.py $output_dir/${input_name}_opt.sdfg 1 T)
 
-python3 $current_dir/bench_dcir.py $output_dir/${input_name}_opt.sdfg 1 T 2> $actual 1> /dev/null
-$output_dir/${input_name}_clang_ref.out 2> $reference 1> /dev/null
+clang -O0 $flags -o $output_dir/${input_name}_clang_ref.out $input_chrono -lm
+$output_dir/${input_name}_clang_ref.out &> /dev/null
+reference=$?
 
-## Obtain array names
-touch $output_dir/arrNames.txt
-
-grep "begin dump:" $reference | while read -r line ; do
-  arrTmp=($line)
-  arrName=${arrTmp[2]}
-  echo -n "$arrName " >> $output_dir/arrNames.txt
-done
-
-arrNames=($(cat $output_dir/arrNames.txt))
-rm $output_dir/arrNames.txt
-
-## Remove Warnings from output
-sed -i '0,/^==BEGIN DUMP_ARRAYS==$/d' $actual
-printf '%s\n%s\n' "==BEGIN DUMP_ARRAYS==" "$(cat $actual)" > $actual
-
-## Use original array names
-idx=0
-grep "begin dump:" $actual | while read -r line ; do
-  arrTmp=($line)
-  arrName=${arrTmp[2]}
-  repArrName=${arrNames[idx]}
-  sed -i -e "s/$arrName/$repArrName/g" $actual
-  idx=$((idx+1))  
-done
-
-## Compare the outputs
-python3 $scripts_dir/../polybench-comparator/comparator.py $reference $actual
-
-if [ $? -ne 0 ]; then
+if [ "$actual" -ne "$reference" ]; then
   echo "Output incorrect!"
   exit 1
 fi
@@ -159,6 +128,6 @@ add_csv "DCIR"
 
 for i in $(seq 1 $repetitions); do
   time=$(python3 $scripts_dir/get_sdfg_times.py \
-    $output_dir/${input_name}_opt.sdfg $((i-1)) T)
+    $output_dir/${input_name}_opt.sdfg $((i-1)) F)
   add_csv "$time"
 done
