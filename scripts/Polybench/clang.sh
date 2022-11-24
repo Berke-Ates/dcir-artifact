@@ -90,6 +90,6 @@ fi
 add_csv "Clang"
 
 for i in $(seq 1 $repetitions); do
-  time=$(./$output_dir/${input_name}_clang.out)
+  time=$(OMP_NUM_THREADS=1 taskset -c 0 ./$output_dir/${input_name}_clang.out)
   add_csv "$time"
 done

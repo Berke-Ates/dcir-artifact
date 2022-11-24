@@ -35,6 +35,9 @@ if [ ! -d $output_dir ]; then
   mkdir -p $output_dir;
 fi
 
+# Clear .dacecache
+rm -rf .dacecache
+
 # Helpers
 input_name=$(basename ${input_file%.*})
 input_dir=$(dirname $input_file)
@@ -121,8 +124,8 @@ if [ "$actual" -ne "$reference" ]; then
 fi
 
 # Running the benchmark
-python3 $current_dir/bench_dcir.py $output_dir/${input_name}_opt.sdfg \
-  $repetitions F
+OMP_NUM_THREADS=1 taskset -c 0 python3 $current_dir/bench_dcir.py \
+  $output_dir/${input_name}_opt.sdfg $repetitions F
 
 add_csv "DCIR"
 

@@ -31,6 +31,9 @@ if [ ! -d $output_dir ]; then
   mkdir -p $output_dir;
 fi
 
+# Clear .dacecache
+rm -rf .dacecache
+
 # Helpers
 input_name=$(basename ${input_file%.*})
 input_dir=$(dirname $input_file)
@@ -72,8 +75,8 @@ python3 $scripts_dir/opt_sdfg.py $input_dir/${input_name}_c2dace.sdfg \
   $output_dir/${input_name}_c2dace_opt.sdfg $opt_lvl_dc T
 
 # Running the benchmark
-python3 $current_dir/bench_dace.py $output_dir/${input_name}_c2dace_opt.sdfg \
-  $repetitions
+OMP_NUM_THREADS=1 taskset -c 0 python3 $current_dir/bench_dace.py \
+  $output_dir/${input_name}_c2dace_opt.sdfg $repetitions
 
 add_csv "DaCe"
 
