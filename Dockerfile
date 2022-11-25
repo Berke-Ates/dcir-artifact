@@ -19,6 +19,7 @@ ENV TERM=xterm-color
 # Install dependencies
 RUN apt update -y && \ 
   apt install -y \
+  wget \
   git \
   cmake \
   ninja-build \
@@ -38,21 +39,6 @@ RUN git submodule update --init --recursive --depth 1
 # Dependencies for plotting
 RUN pip install --upgrade pip
 RUN pip install --upgrade seaborn
-
-################################################################################
-### Install ICC
-################################################################################
-
-RUN wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
-  | gpg --dearmor \
-  | tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
-
-RUN echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
-  | tee /etc/apt/sources.list.d/oneAPI.list
-
-RUN apt update -y && apt install -y intel-hpckit
-
-RUN echo "source /opt/intel/oneapi/compiler/2022.2.1/env/vars.sh" >> $HOME/.bashrc
 
 ################################################################################
 ### Install DaCe
@@ -185,3 +171,18 @@ RUN ninja
 
 # Add binaries to PATH
 ENV PATH=$HOME/Polygeist/build/bin:$PATH
+
+################################################################################
+### Install ICC
+################################################################################
+
+RUN wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+  | gpg --dearmor \
+  | tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+
+RUN echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
+  | tee /etc/apt/sources.list.d/oneAPI.list
+
+RUN apt update -y && apt install -y intel-hpckit
+
+RUN echo "source /opt/intel/oneapi/compiler/2022.2.1/env/vars.sh" >> $HOME/.bashrc
