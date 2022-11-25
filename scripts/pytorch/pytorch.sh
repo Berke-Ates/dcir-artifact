@@ -31,8 +31,8 @@ if [ ! -d $output_dir ]; then
 fi
 
 # Helpers
-input_name=$(basename ${input_file%.*})
 input_dir=$(dirname $input_file)
+input_name=$(basename ${input_dir%.*})
 input_file=$input_dir/pytorch.py
 current_dir=$(dirname $0)
 scripts_dir=$(dirname $0)/..
