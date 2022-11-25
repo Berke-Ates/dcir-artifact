@@ -53,7 +53,7 @@ add_csv(){
 }
 
 # Running the benchmark
-runtimes=$(python3 $input_file 10 $repetitions F) 
+runtimes=$(python3 $input_file $repetitions F) 
 
 add_csv "PyTorch"
 
