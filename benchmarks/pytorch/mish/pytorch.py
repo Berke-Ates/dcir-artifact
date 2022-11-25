@@ -47,6 +47,7 @@ for i in range(repetitions):
     runtime = time.time() - start
     print(runtime)
 
+# Output
 if print_output:
     data = torch.zeros(8, 32, 224, 224)
 
