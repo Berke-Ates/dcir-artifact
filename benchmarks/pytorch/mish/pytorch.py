@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
-# Desc: Runs the Mish benchmark using Pytorch. The output contains any
-#       intermediate results and the times in the CSV format
+# Desc: Runs the Mish benchmark using Pytorch
 # Usage: python3 pytorch.py <Repetitions> <Print Output (T/F)>
 
 import sys

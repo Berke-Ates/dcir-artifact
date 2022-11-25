@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
-# Desc: Runs the Mish benchmark using Torch-MLIR. The output contains any
-#       intermediate results and the times in the CSV format
+# Desc: Runs the Mish benchmark using Torch-MLIR
 # Usage: python3 torch-mlir.py <Repetitions> <Print Output (T/F)>
 
 import sys
