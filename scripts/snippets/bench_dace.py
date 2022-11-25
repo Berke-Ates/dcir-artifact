@@ -20,6 +20,7 @@ repetitions = int(sys.argv[2])
 sdfg = dace.SDFG.from_file(input_file)
 obj = sdfg.compile()
 
+# Run Benchmark
 for i in range(repetitions):
     argv_loc = dace.ndarray(shape=(0, ), dtype=dace.dtypes.int8)
     obj(argc_loc=0, _argcount=0, argv_loc=argv_loc)

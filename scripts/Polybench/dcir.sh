@@ -84,9 +84,9 @@ if [[ "$input_name" == "floyd-warshall" ]]; then
 fi
 
 # Dace Settings
-export DACE_compiler_cpu_executable="$(which g++)"
-export CC=`which gcc`
-export CXX=`which g++`
+export DACE_compiler_cpu_executable="$(which icc)"
+export CC=`which icc`
+export CXX=`which icc`
 export DACE_compiler_cpu_openmp_sections=0
 export DACE_instrumentation_report_each_invocation=0
 export DACE_compiler_cpu_args="-fPIC -O$opt_lvl_cc -march=native"
