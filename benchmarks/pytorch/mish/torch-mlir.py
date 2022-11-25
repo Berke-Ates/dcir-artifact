@@ -49,12 +49,6 @@ compiled = backend.compile(module)
 jit_module = backend.load(compiled)
 jit_func = jit_module.forward
 
-# Warmup
-for i in range(10):
-    data = torch.rand(8, 32, 224, 224)
-    dnp = data.numpy()
-    jit_func(dnp)
-
 # Benchmark
 for i in range(repetitions):
     data = torch.rand(8, 32, 224, 224)

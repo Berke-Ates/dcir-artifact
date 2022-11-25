@@ -33,11 +33,6 @@ class Mish(nn.Module):
 model = nn.Sequential(Mish()).to(torch.device('cpu'))
 model.eval()
 
-# Warmup
-for i in range(10):
-    data = torch.rand(8, 32, 224, 224)
-    model.forward(data)
-
 # Benchmark
 for i in range(repetitions):
     data = torch.rand(8, 32, 224, 224)
