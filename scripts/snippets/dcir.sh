@@ -29,6 +29,7 @@ check_tool mlir-opt
 check_tool sdfg-opt
 check_tool sdfg-translate
 check_tool python3
+check_tool icc
 
 # Create output directory
 if [ ! -d $output_dir ]; then

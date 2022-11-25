@@ -25,6 +25,7 @@ check_tool(){
 
 check_tool clang
 check_tool python3
+check_tool icc
 
 # Create output directory
 if [ ! -d $output_dir ]; then
