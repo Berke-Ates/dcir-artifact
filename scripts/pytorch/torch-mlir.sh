@@ -54,7 +54,7 @@ add_csv(){
 }
 
 # Running the benchmark
-runtimes=$(python3 $input_file $repetitions F) 
+runtimes=$(OMP_NUM_THREADS=1 taskset -c 0 python3 $input_file $repetitions F) 
 
 add_csv "Torch-MLIR"
 
