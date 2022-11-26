@@ -99,7 +99,7 @@ python3 $scripts_dir/opt_sdfg.py $output_dir/$input_name.sdfg \
   $output_dir/${input_name}_opt.sdfg 3 T
 
 # Check output
-if ! python3 $bench_file $output_dir/${input_name}_opt.sdfg0 T; then
+if ! python3 $bench_file $output_dir/${input_name}_opt.sdfg 0 T; then
   echo "Output incorrect!"
   exit 1
 fi
@@ -112,6 +112,6 @@ add_csv "DCIR"
 
 for i in $(seq 1 $repetitions); do
   time=$(python3 $scripts_dir/get_sdfg_times.py \
-    $output_dir/${input_name}_opt.sdfg $((i-1)) T)
+    $output_dir/${input_name}_opt.sdfg $((i-1)) F)
   add_csv "$time"
 done

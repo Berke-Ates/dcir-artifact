@@ -55,7 +55,7 @@ for i in range(repetitions):
     start = time.time()
     jit_func(dnp)
     runtime = time.time() - start
-    print(runtime)
+    print(runtime * 1000)
 
 # Test output
 if test_output:

@@ -60,8 +60,9 @@ for runner in $runners; do
 done
 
 for benchmark in $benchmarks; do
-    bname="$(basename $benchmark .c)"
-    mv "$output_dir/${bname}_timings.csv" "$output_dir/${bname}.csv"
-    python3 $scripts_dir/single_plot.py "$output_dir/${bname}.csv" \
-      $output_dir/$bname.pdf
+    bench_dir=$(dirname $benchmark)
+    bench_name=$(basename ${bench_dir%.*})
+    mv "$output_dir/${bench_name}_timings.csv" "$output_dir/${bench_name}.csv"
+    python3 $scripts_dir/single_plot.py "$output_dir/${bench_name}.csv" \
+      $output_dir/$bench_name.pdf
 done
