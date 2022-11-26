@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-# Desc: Generates MLIR code for DCIR
+# Desc: Generates MLIR code for DCIR of the Mish benchmark
 # Usage: python3 dcir.py
 
 import torch
