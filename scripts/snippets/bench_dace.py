@@ -6,8 +6,8 @@
 import sys
 import dace
 
-if len(sys.argv) != 4:
-    print("DaCe Polybench Benchmarking Tool")
+if len(sys.argv) != 3:
+    print("DaCe Snippet Benchmarking Tool")
     print("Arguments:")
     print("  Input SDFG: The SDFG to benchmark")
     print("  Repetitions: How many times to run the benchmark")

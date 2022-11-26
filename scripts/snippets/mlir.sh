@@ -69,7 +69,7 @@ compile_with_mlir(){
   # Generating MLIR from C using Polygeist
   cgeist -resource-dir=$(clang -print-resource-dir) \
     -S --memref-fullrank -O$opt_lvl_cc --raise-scf-to-affine $flags \
-    $additional_flags $input_file > $output_dir/${output_name}_cgeist.mlir
+    $additional_flags $input_chrono > $output_dir/${output_name}_cgeist.mlir
 
   # Optimizing with MLIR
   mlir-opt --affine-loop-invariant-code-motion \
