@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # Desc: Runs the Mish benchmark using Torch-MLIR
-# Usage: python3 torch-mlir.py <Repetitions> <Print Output (T/F)>
+# Usage: python3 torch-mlir.py <Repetitions> <Test Output (T/F)>
 
 import sys
 import numpy as np
@@ -14,13 +14,12 @@ from torch_mlir_e2e_test.mhlo_backends.linalg_on_tensors import LinalgOnTensorsM
 if len(sys.argv) != 3:
     print("Torch-MLIR Mish Benchmarking Tool")
     print("Arguments:")
-    print("  Warmup: How many rounds of warmup to run")
     print("  Repetitions: How many times to run the benchmark")
-    print("  Print Output (T/F): If 'T', prints the output to standard error")
+    print("  Test Output (T/F): If 'T', tests the output against PyTorch")
     exit(1)
 
 repetitions = int(sys.argv[1])
-print_output = sys.argv[2] == 'T'
+test_output = sys.argv[2] == 'T'
 
 
 # Load model
@@ -58,8 +57,8 @@ for i in range(repetitions):
     runtime = time.time() - start
     print(runtime)
 
-# Output
-if print_output:
+# Test output
+if test_output:
     data = torch.zeros(8, 32, 224, 224)
 
     for i in range(8):
@@ -68,6 +67,10 @@ if print_output:
                 for l in range(224):
                     data[i, j, k, l] = (i + j + k + l) / (8 + 32 + 224 + 224)
 
-    dnp = data.numpy()
-    prediction = jit_func(dnp)
-    print(prediction, file=sys.stderr)
+    prediction_pytorch = model.forward(data).numpy()
+    prediction_torch_mlir = jit_func(data.numpy())
+
+    # Compare
+    if not np.allclose(
+            prediction_pytorch, prediction_torch_mlir, rtol=1e-5, atol=1e-8):
+        exit(1)

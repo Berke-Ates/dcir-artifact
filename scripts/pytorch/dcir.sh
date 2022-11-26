@@ -42,7 +42,8 @@ rm -rf .dacecache
 # Helpers
 input_dir=$(dirname $input_file)
 input_name=$(basename ${input_dir%.*})
-input_file=$input_dir/dcir.py
+gen_file=$input_dir/dcir_gen.py
+bench_file=$input_dir/dcir_bench.py
 current_dir=$(dirname $0)
 scripts_dir=$(dirname $0)/..
 timings_file=$output_dir/${input_name}_timings.csv; touch $timings_file
@@ -71,7 +72,7 @@ export DACE_instrumentation_report_each_invocation=0
 export DACE_compiler_cpu_args="-fPIC -O3 -march=native"
 
 # Generating MLIR using Torch-MLIR
-python3 $input_file > $output_dir/${input_name}_mhlo.mlir
+python3 $gen_file > $output_dir/${input_name}_mhlo.mlir
 
 # Renaming `forward` to `main` (required by DCIR)
 sed -i -e "s/forward/main/g" $output_dir/${input_name}_mhlo.mlir
@@ -97,8 +98,14 @@ sdfg-translate --mlir-to-sdfg $output_dir/${input_name}_sdfg.mlir \
 python3 $scripts_dir/opt_sdfg.py $output_dir/$input_name.sdfg \
   $output_dir/${input_name}_opt.sdfg 3 T
 
+# Check output
+if ! python3 $bench_file $output_dir/${input_name}_opt.sdfg0 T; then
+  echo "Output incorrect!"
+  exit 1
+fi
+
 # Running the benchmark
-OMP_NUM_THREADS=1 taskset -c 0 python3 $current_dir/bench_dcir.py \
+OMP_NUM_THREADS=1 taskset -c 0 python3 $bench_file \
   $output_dir/${input_name}_opt.sdfg $repetitions F
 
 add_csv "DCIR"

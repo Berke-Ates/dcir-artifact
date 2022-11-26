@@ -53,6 +53,12 @@ add_csv(){
   csv_line=$((csv_line+1))
 }
 
+# Check output
+if ! python3 $input_file 0 T; then
+  echo "Output incorrect!"
+  exit 1
+fi
+
 # Running the benchmark
 runtimes=$(OMP_NUM_THREADS=1 taskset -c 0 python3 $input_file $repetitions F) 
 
