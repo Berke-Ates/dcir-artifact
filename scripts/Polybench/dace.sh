@@ -23,7 +23,6 @@ check_tool(){
   fi
 }
 
-check_tool clang
 check_tool python3
 check_tool icc
 

@@ -24,6 +24,7 @@ check_tool(){
 }
 
 check_tool clang
+check_tool gcc
 check_tool cgeist
 check_tool mlir-opt
 check_tool sdfg-opt
@@ -47,7 +48,7 @@ current_dir=$(dirname $0)
 scripts_dir=$(dirname $0)/..
 timings_file=$output_dir/${input_name}_timings.csv; touch $timings_file
 reference=$output_dir/${input_name}_reference.txt
-actual=$output_dir/${input_name}_actual_gcc.txt
+actual=$output_dir/${input_name}_actual_dcir.txt
 
 # Adds a value to the timings file, jumps to the next row after a write
 csv_line=1
@@ -115,11 +116,11 @@ python3 $scripts_dir/opt_sdfg.py $output_dir/$input_name.sdfg \
   $output_dir/${input_name}_opt.sdfg $opt_lvl_dc T
 
 # Check output
-clang -I $utils_dir -O0 $flags -DPOLYBENCH_DUMP_ARRAYS \
-  -o $output_dir/${input_name}_clang_ref.out $input_file $utils_dir/polybench.c -lm
+gcc -I $utils_dir -O0 $flags -DPOLYBENCH_DUMP_ARRAYS \
+  -o $output_dir/${input_name}_gcc_ref.out $input_file $utils_dir/polybench.c -lm
 
 python3 $current_dir/bench_dcir.py $output_dir/${input_name}_opt.sdfg 1 T 2> $actual 1> /dev/null
-$output_dir/${input_name}_clang_ref.out 2> $reference 1> /dev/null
+$output_dir/${input_name}_gcc_ref.out 2> $reference 1> /dev/null
 
 ## Obtain array names
 touch $output_dir/arrNames.txt

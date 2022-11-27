@@ -108,7 +108,7 @@ compile_with_mlir "" "${input_name}_mlir"
 # Check output
 compile_with_mlir "-DPOLYBENCH_DUMP_ARRAYS" "${input_name}_mlir_dump"
 
-clang -I $utils_dir -O0 $flags -DPOLYBENCH_DUMP_ARRAYS \
+gcc -I $utils_dir -O0 $flags -DPOLYBENCH_DUMP_ARRAYS \
   -o $output_dir/${input_name}_clang_ref.out $input_file $utils_dir/polybench.c -lm
 
 $output_dir/${input_name}_mlir_dump.out 2> $actual 1> /dev/null
