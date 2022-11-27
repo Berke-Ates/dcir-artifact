@@ -41,7 +41,7 @@ rm -rf .dacecache
 
 # Helpers
 input_dir=$(dirname $input_file)
-input_name=$(basename ${input_dir%.*})
+input_name=$(basename $input_dir)
 gen_file=$input_dir/dcir_gen.py
 bench_file=$input_dir/dcir_bench.py
 current_dir=$(dirname $0)

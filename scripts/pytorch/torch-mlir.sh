@@ -32,7 +32,7 @@ fi
 
 # Helpers
 input_dir=$(dirname $input_file)
-input_name=$(basename ${input_dir%.*})
+input_name=$(basename $input_dir)
 input_file=$input_dir/torch-mlir.py
 current_dir=$(dirname $0)
 scripts_dir=$(dirname $0)/..
