@@ -33,6 +33,17 @@ def printArray(arr, offset, depth):
         print("%.4f " % arr, end='', file=sys.stderr)
 
 
+# Printer for the Deriche benchmark
+def printDeriche(arr):
+    W = 4096
+    H = 2160
+    for i in range(W):
+        for j in range(H):
+            if (i * H + j) % 20 == 0:
+                print("", file=sys.stderr)
+            print("%.4f " % arr[i, j], end='', file=sys.stderr)
+
+
 # Printer for the Doitgen benchmark
 def printDoitgen(arr):
     NQ = 140
@@ -97,6 +108,8 @@ if print_output:
             printCholesky(arr)
         elif "gramschmidt" in input_file:
             printGramschmidt(arr, argName == "_arg1")
+        elif "deriche" in input_file:
+            printDeriche(arr)
         elif "doitgen" in input_file:
             printDoitgen(arr)
         else:
