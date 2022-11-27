@@ -43,7 +43,7 @@ if opt_lvl >= 2:
     sdfg.simplify()
 
 if opt_lvl > 0:
-    move_small_arrays_to_stack(sdfg)  # TODO: Can this be moved?
+    move_small_arrays_to_stack(sdfg)
 
 if opt_lvl == 3:
     auto_optimize(sdfg, dace.DeviceType.CPU)
