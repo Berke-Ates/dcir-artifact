@@ -8,9 +8,9 @@ Pull the docker image with:
 sudo docker pull berkeates/dcir-cgo23:latest
 ```
 
-Alternatively use the reduced image:
+And run it:
 ```sh
-sudo docker pull berkeates/dcir-cgo23:slim
+sudo docker run -it --rm berkeates/dcir-cgo23
 ```
 
 ## 2. Option: Manually build the docker image
@@ -67,4 +67,3 @@ To run all benchmarks execute:
 - `torch-mlir`: Folder containing the Torch-MLIR project
 - `Dockerfile`: Dockerfile to build the image
 - `README.md`: This file
-- `slim.Dockerfile`: Dockerfile to build a reduced image (requires the full image)
