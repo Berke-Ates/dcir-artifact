@@ -25,6 +25,7 @@ check_tool(){
 
 check_tool llc
 check_tool clang
+check_tool clang-13
 check_tool cgeist
 check_tool mlir-opt
 check_tool mlir-translate
@@ -67,7 +68,7 @@ compile_with_mlir(){
   output_name=$2
 
   # Generating MLIR from C using Polygeist
-  cgeist -resource-dir=$(clang -print-resource-dir) \
+  cgeist -resource-dir=$(clang-13 -print-resource-dir) \
     -S --memref-fullrank -O$opt_lvl_cc --raise-scf-to-affine $flags \
     $additional_flags $input_chrono > $output_dir/${output_name}_cgeist.mlir
 

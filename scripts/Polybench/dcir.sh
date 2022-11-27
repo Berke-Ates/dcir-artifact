@@ -24,6 +24,7 @@ check_tool(){
 }
 
 check_tool clang
+check_tool clang-13
 check_tool gcc
 check_tool cgeist
 check_tool mlir-opt
@@ -94,7 +95,7 @@ export DACE_instrumentation_report_each_invocation=0
 export DACE_compiler_cpu_args="-fPIC -O$opt_lvl_cc -march=native"
 
 # Generating MLIR from C using Polygeist
-cgeist -resource-dir=$(clang -print-resource-dir) -I $utils_dir \
+cgeist -resource-dir=$(clang-13 -print-resource-dir) -I $utils_dir \
   -S --memref-fullrank -O$opt_lvl_cc --raise-scf-to-affine $flags $input_file \
   > $output_dir/${input_name}_cgeist.mlir
 

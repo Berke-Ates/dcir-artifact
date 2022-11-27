@@ -24,6 +24,7 @@ check_tool(){
 }
 
 check_tool clang
+check_tool clang-13
 check_tool cgeist
 check_tool mlir-opt
 check_tool sdfg-opt
@@ -67,21 +68,6 @@ flags="-fPIC -march=native"
 opt_lvl_cc=3 # Optimization level for the control-centric optimizations
 opt_lvl_dc=3 # Optimization level for the data-centric optimizations
 
-# Lower optimization level for specific benchmarks
-if [[ "$input_name" == "gramschmidt" ]]; then
-  opt_lvl_cc=2
-fi
-
-if [[ "$input_name" == "durbin" ]] || \
-   [[ "$input_name" == "gemver" ]] || \
-   [[ "$input_name" == "doitgen" ]]; then
-  opt_lvl_dc=2
-fi
-
-if [[ "$input_name" == "floyd-warshall" ]]; then
-  opt_lvl_dc=1
-fi
-
 # Dace Settings
 export DACE_compiler_cpu_executable="$(which icc)"
 export CC=`which icc`
@@ -91,7 +77,7 @@ export DACE_instrumentation_report_each_invocation=0
 export DACE_compiler_cpu_args="-fPIC -O$opt_lvl_cc -march=native"
 
 # Generating MLIR from C using Polygeist
-cgeist -resource-dir=$(clang -print-resource-dir) -S --memref-fullrank \
+cgeist -resource-dir=$(clang-13 -print-resource-dir) -S --memref-fullrank \
   -O$opt_lvl_cc --raise-scf-to-affine $flags $input_file \
   > $output_dir/${input_name}_cgeist.mlir
 

@@ -186,3 +186,10 @@ RUN echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https:/
 RUN apt update -y && apt install -y intel-hpckit
 
 RUN echo "source /opt/intel/oneapi/compiler/2022.2.1/env/vars.sh" >> $HOME/.bashrc
+
+################################################################################
+### Install Clang-13
+################################################################################
+
+RUN apt install -y clang-13
+RUN cp `which clang-13` `which clang`
