@@ -10,7 +10,7 @@ from torch import nn
 import numpy as np
 
 if len(sys.argv) != 4:
-    print("DCIR PyTorch Benchmarking Tool")
+    print("DCIR PyTorch Benchmarking Tool (MISH)")
     print("Arguments:")
     print("  Input SDFG: The SDFG to benchmark")
     print("  Repetitions: How many times to run the benchmark")
