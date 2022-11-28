@@ -62,7 +62,24 @@ done
 
 for benchmark in $benchmarks; do
     bname="$(basename $benchmark .c)"
-    mv "$output_dir/${bname}_timings.csv" "$output_dir/${bname}.csv"
-    python3 $scripts_dir/single_plot.py "$output_dir/${bname}.csv" \
-      $output_dir/$bname.pdf
+
+    if [[ "$bname" == "demo" ]]; then
+      fig_num=2
+    fi
+
+    if [[ "$bname" == "memory" ]]; then
+      fig_num=8
+    fi
+
+    if [[ "$bname" == "congrad_multi_field" ]]; then
+      fig_num=9
+    fi
+
+    if [[ "$bname" == "mem_line" ]]; then
+      fig_num=10
+    fi
+
+    mv "$output_dir/${bname}_timings.csv" "$output_dir/${fig_num}.csv"
+    python3 $scripts_dir/single_plot.py "$output_dir/${fig_num}.csv" \
+      $output_dir/$fig_num.pdf
 done

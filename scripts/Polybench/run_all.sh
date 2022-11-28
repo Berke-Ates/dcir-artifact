@@ -66,6 +66,7 @@ for benchmark in $benchmarks; do
     bname="$(basename $benchmark .c)"
     mv "$output_dir/${bname}_timings.csv" "$output_dir/${bname}.csv"
     csv_files+=("$output_dir/${bname}.csv")
+    cp "$output_dir/${bname}.csv" "$output_dir/fig6_${bname}.csv"
 done
 
-python3 $scripts_dir/multi_plot.py ${csv_files[*]} $output_dir/polybench.pdf
+python3 $scripts_dir/multi_plot.py ${csv_files[*]} $output_dir/fig6.pdf
