@@ -62,7 +62,7 @@ opt_lvl_cc=3 # Optimization level for the control-centric optimizations
 
 # Lower optimization level for specific benchmarks
 if [[ "$input_name" == "gramschmidt" ]]; then
-  opt_lvl_cc=2
+  opt_lvl_cc=1
 fi
 
 # Compile

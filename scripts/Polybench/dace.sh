@@ -73,7 +73,14 @@ if [[ "$input_name" == "durbin" ]] || \
   opt_lvl_dc=2
 fi
 
-if [[ "$input_name" == "floyd-warshall" ]]; then
+if [[ "$input_name" == "floyd-warshall" ]] || \
+   [[ "$input_name" == "3mm" ]] || \
+   [[ "$input_name" == "cholesky" ]] || \
+   [[ "$input_name" == "gemm" ]] || \
+   [[ "$input_name" == "lu" ]] || \
+   [[ "$input_name" == "ludcmp" ]] || \
+   [[ "$input_name" == "symm" ]] || \
+   [[ "$input_name" == "syr2k" ]]; then
   opt_lvl_dc=1
 fi
 
