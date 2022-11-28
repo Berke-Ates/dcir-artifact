@@ -25,6 +25,9 @@
  * =======================================================================================
  */
 
+// Source: https://github.com/RRZE-HPC/TheBandwidthBenchmark/blob/master/src/main.c
+// Commit Hash: 91896f1cc0064317bdae0b71c38c29fc8434fb6d
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
@@ -34,8 +37,6 @@
 #include <unistd.h>
 #include <limits.h>
 #include <float.h>
-
-// https://github.com/RRZE-HPC/TheBandwidthBenchmark/blob/master/src/main.c
 
 int main(int argc, char **argv)
 {

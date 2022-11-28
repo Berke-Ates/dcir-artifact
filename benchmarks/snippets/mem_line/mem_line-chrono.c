@@ -1,9 +1,10 @@
+// Source: https://github.com/FilipHa5/Performance-benchmarks/blob/master/mem_line_size.c
+// Commit Hash: c3a20004b9e2de32710ab484be49b76c7f1743b1
+
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <stdio.h>
-
-// https://github.com/FilipHa5/Performance-benchmarks/blob/master/mem_line_size.c
 
 #define WORKING_SET_SIZE 409600
 

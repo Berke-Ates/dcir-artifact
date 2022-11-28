@@ -24,7 +24,9 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-// https://github.com/milc-qcd/milc_qcd/blob/master/arb_overlap/congrad_multi_field.c
+// Source: https://github.com/milc-qcd/milc_qcd/blob/master/arb_overlap/congrad_multi_field.c
+// Commit Hash: f407b3a75f1df9ea7fee3f63e5fe3b0899ee66c5
+
 #include <stdlib.h>
 #include <stdio.h>
 
