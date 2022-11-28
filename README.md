@@ -18,7 +18,7 @@ sudo docker run -it --rm berkeates/dcir-cgo23
 ## Option 2: Manually build the docker image
 ### Check out the code
 ```sh
-git clone [--recurse-submodules] --depth 1 --shallow-submodules <URL>
+git clone [--recurse-submodules] --depth 1 --shallow-submodules https://github.com/Berke-Ates/dcir-artifact
 cd dcir-artifact
 ```
 ### Build the image
