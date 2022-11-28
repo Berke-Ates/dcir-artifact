@@ -1,8 +1,10 @@
+# DCIR Artifact
+This repository contains the artifact for "Bridging Control-Centric and Data-Centric Optimization", submitted to CGO'23.
+
 # Setup
+There are three options to run the benchmarks (`sudo` is not always necessary):
 
-There are three options to run the benchmarks:
-
-## 1. Option: Pull the docker image
+## Option 1: Pull the docker image
 Pull the docker image with:
 ```sh
 sudo docker pull berkeates/dcir-cgo23:latest
@@ -13,7 +15,7 @@ And run it:
 sudo docker run -it --rm berkeates/dcir-cgo23
 ```
 
-## 2. Option: Manually build the docker image
+## Option 2: Manually build the docker image
 ### Check out the code
 ```sh
 git clone [--recurse-submodules] --depth 1 --shallow-submodules <URL>
@@ -28,7 +30,7 @@ sudo docker build -t dcir-cgo23 .
 sudo docker run -it --rm dcir-cgo23
 ```
 
-## 3. Option: Manual Setup
+## Option 3: Manual Setup
 For a manual setup follow the instructions in the `Dockerfile` on your machine.
 
 # Requirements
@@ -38,11 +40,15 @@ and a running instance of the Docker daemon.
 The requirements for a manual setup are listed in the `Dockerfile`.
 
 # Running
-
-To run all benchmarks execute:
+To run all benchmarks execute the following script _inside the docker container_:
 ```sh
 ./scripts/run_all.sh <Output directory> <Number of repetitions>
 ```
+
+The outputs will then be in CSV format in the output directory, organized by
+figure number or result name. The results are also plotted to PDF files.
+
+The raw results from the original paper can be found in the `output` subdirectory.
 
 # File Structure
 - `benchmarks`: Folder containing all benchmarks files
@@ -52,6 +58,7 @@ To run all benchmarks execute:
 - `dace`: Folder containing the DaCe project
 - `mlir-dace`: Folder containing the MLIR-DaCe project
 - `mlir-hlo`: Folder containing the MLIR-HLO project
+- `output`: Raw outputs from the paper
 - `polybench-comparator`: Folder containing a python script to compare Polybench outputs
 - `Polygeist`: Folder containing the Polygeist project
 - `scripts`: Folder containing all scripts to run the benchmarks. Every script prints its usage, if it's called without arguments
