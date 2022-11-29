@@ -68,6 +68,10 @@ if [[ "$input_name" == "congrad_multi_field" ]]; then
   opt_lvl_dc=1
 fi
 
+if [[ "$input_name" == "demo" ]]; then
+  opt_lvl_dc=2
+fi
+
 # Dace Settings
 export DACE_compiler_cpu_executable="$(which clang++)"
 export CC=`which clang`
