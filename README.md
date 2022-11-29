@@ -21,11 +21,6 @@ And run it:
 sudo docker run -it --rm berkeates/dcir-cgo23
 ```
 
-In order to create a folder that's mounted in the container use:
-```sh
-sudo docker run -it --rm -v <local folder>:<container folder> berkeates/dcir-cgo23
-```
-
 ## Option 2: Manually build the docker image
 ### Check out the code
 ```sh
@@ -52,6 +47,19 @@ To run all benchmarks execute the following script _inside the docker container_
 
 The outputs will then be in CSV format in the output directory, organized by
 figure number or result name. The results are also plotted to PDF files.
+
+If running in a container, you can mount a local folder to view the results outside it.
+To do so, use the `-v` flag when running the container, as follows:
+```sh
+sudo docker run -it --rm -v <local folder>:<container folder> berkeates/dcir-cgo23
+```
+
+For example:
+```
+$ mkdir results
+$ sudo docker run -it --rm -v /path/to/local/results:/home/user/ae berkeates/dcir-cgo23
+# ./scripts/run_all.sh ae 10
+```
 
 The raw results from the original paper can be found in the `output` subdirectory.
 
