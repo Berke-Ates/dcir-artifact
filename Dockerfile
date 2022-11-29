@@ -278,3 +278,4 @@ COPY ./benchmarks ./benchmarks
 COPY ./output ./output
 COPY ./scripts ./scripts
 COPY ./README.md ./README.md
+COPY ./LICENSE.txt ./LICENSE.txt
