@@ -63,6 +63,11 @@ add_csv(){
 flags="-fPIC -march=native"
 opt_lvl_dc=3 # Optimization level for the data-centric optimizations
 
+# Lower optimization level for specific benchmarks
+if [[ "$input_name" == "congrad_multi_field" ]]; then
+  opt_lvl_dc=1
+fi
+
 # Dace Settings
 export DACE_compiler_cpu_executable="$(which icc)"
 export CC=`which icc`
