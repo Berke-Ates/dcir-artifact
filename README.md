@@ -1,6 +1,12 @@
 # DCIR Artifact
 This repository contains the artifact for "Bridging Control-Centric and Data-Centric Optimization", submitted to CGO'23.
 
+# Requirements
+Running and building the Docker container requires an installation of docker
+and a running instance of the Docker daemon.
+
+The requirements for a manual setup are listed in the `Dockerfile`.
+
 # Setup
 There are three options to run the benchmarks (`sudo` is not always necessary):
 
@@ -13,6 +19,11 @@ sudo docker pull berkeates/dcir-cgo23:latest
 And run it:
 ```sh
 sudo docker run -it --rm berkeates/dcir-cgo23
+```
+
+In order to create a folder that's mounted in the container use:
+```sh
+sudo docker run -it --rm -v <local folder>:<container folder> berkeates/dcir-cgo23
 ```
 
 ## Option 2: Manually build the docker image
@@ -32,12 +43,6 @@ sudo docker run -it --rm dcir-cgo23
 
 ## Option 3: Manual Setup
 For a manual setup follow the instructions in the `Dockerfile` on your machine.
-
-# Requirements
-Running and building the Docker container requires an installation of docker
-and a running instance of the Docker daemon.
-
-The requirements for a manual setup are listed in the `Dockerfile`.
 
 # Running
 To run all benchmarks execute the following script _inside the docker container_:
