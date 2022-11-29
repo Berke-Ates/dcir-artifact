@@ -50,6 +50,18 @@ figure number or result name. The results are also plotted to PDF files.
 
 The raw results from the original paper can be found in the `output` subdirectory.
 
+To run a single benchmark use the runners in the subdirectories:
+- `scripts/Polybench`: For Polybench benchmarks
+- `scripts/pytorch`: For PyTorch benchmarks
+- `scripts/snippets`: For snippet benchmarks
+
+An example command can be seen in this line:
+```sh
+./scripts/Polybench/dcir.sh ./benchmarks/Polybench/2mm/2mm.c <Output directory> <Number of repetitions>
+```
+
+The subdirectories also contain a `run_all.sh`, which executes all benchmarks of their group.
+
 # File Structure
 - `benchmarks`: Folder containing all benchmarks files
   - `Polybench`: Folder containing all Polybench benchmarks. The subfolders contain the edited C benchmarks and the generated SDFG files for the DaCe benchmarks.
