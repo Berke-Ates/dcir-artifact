@@ -79,7 +79,7 @@ for benchmark in $benchmarks; do
       fig_num=10
     fi
 
-    mv "$output_dir/${bname}_timings.csv" "$output_dir/${fig_num}.csv"
-    python3 $scripts_dir/single_plot.py "$output_dir/${fig_num}.csv" \
-      $output_dir/$fig_num.pdf
+    mv "$output_dir/${bname}_timings.csv" "$output_dir/fig${fig_num}.csv"
+    python3 $scripts_dir/single_plot.py "$output_dir/fig${fig_num}.csv" \
+      $output_dir/fig$fig_num.pdf
 done
