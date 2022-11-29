@@ -67,7 +67,7 @@ for benchmark in $benchmarks; do
       fig_num=2
     fi
 
-    if [[ "$bname" == "memory" ]]; then
+    if [[ "$bname" == "mem_line" ]]; then
       fig_num=8
     fi
 
@@ -75,7 +75,7 @@ for benchmark in $benchmarks; do
       fig_num=9
     fi
 
-    if [[ "$bname" == "mem_line" ]]; then
+    if [[ "$bname" == "memory" ]]; then
       fig_num=10
     fi
 
