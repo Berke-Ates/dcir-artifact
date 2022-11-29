@@ -8,9 +8,6 @@
 [submodule "mlir-hlo"]
 	path = mlir-hlo
 	url = https://github.com/tensorflow/mlir-hlo
-[submodule "dace"]
-	path = dace
-	url = https://github.com/spcl/dace
 [submodule "Polygeist"]
 	path = Polygeist
 	url = https://github.com/llvm/Polygeist
