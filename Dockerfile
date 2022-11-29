@@ -243,19 +243,6 @@ ENV PYTHONPATH=$HOME/torch-mlir/build/tools/torch-mlir/python_packages/torch_mli
 ENV PYTHONPATH=$HOME/torch-mlir/build/../examples:$PYTHONPATH
 
 ################################################################################
-### Install dace
-################################################################################
-
-RUN git clone --depth 1 --branch cgo23 https://github.com/Berke-Ates/dace.git
-
-WORKDIR $HOME/dace
-RUN git submodule update --init --recursive --depth 1
-
-RUN pip install --editable .
-
-WORKDIR $HOME
-
-################################################################################
 ### Install ICC
 ################################################################################
 
@@ -269,6 +256,19 @@ RUN echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https:/
 RUN apt update -y && apt install -y intel-hpckit
 
 RUN echo "source /opt/intel/oneapi/compiler/2022.2.1/env/vars.sh" >> $HOME/.bashrc
+
+################################################################################
+### Install dace
+################################################################################
+
+RUN git clone --depth 1 --branch cgo23 https://github.com/Berke-Ates/dace.git
+
+WORKDIR $HOME/dace
+RUN git submodule update --init --recursive --depth 1
+
+RUN pip install --editable .
+
+WORKDIR $HOME
 
 ################################################################################
 ### Copy files over
