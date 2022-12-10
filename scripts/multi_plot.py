@@ -15,7 +15,7 @@ from math import ceil
 if len(sys.argv) < 3:
     print("Multi Benchmark Plotting Tool")
     print("Arguments:")
-    print("  Input CSVs: A list of CSV files to plot")
+    print("  Input CSVs: A list of CSV files to plot (at least 4)")
     print("  Output File: The filepath of the generated plot")
     exit(1)
 
@@ -27,6 +27,11 @@ matplotlib.rcParams['ps.fonttype'] = 42
 
 dt = []
 num_bench = len(input_files)
+
+if (num_bench < 4):
+    print("This plotter requires at least 4 CSV files")
+    exit(1)
+
 rows = 3
 cols = ceil(num_bench / rows)
 color = ['#4D678D', '#4D678D', '#4D678D', '#4D678D', '#EA7878']
