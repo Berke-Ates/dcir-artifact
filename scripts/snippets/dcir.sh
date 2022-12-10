@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Desc: Runs a Polybench benchmark using DCIR. The output contains any
+# Desc: Runs a snippet benchmark using DCIR. The output contains any
 #       intermediate results and the times in the CSV format
 # Usage: ./dcir.sh <Benchmark File> <Output Dir> <Repetitions>
 
@@ -16,10 +16,10 @@ output_dir=$2
 repetitions=$3
 
 # Check tools
-check_tool(){
-  if ! command -v $1 &> /dev/null; then
-      echo "$1 could not be found"
-      exit 1
+check_tool() {
+  if ! command -v $1 &>/dev/null; then
+    echo "$1 could not be found"
+    exit 1
   fi
 }
 
@@ -34,7 +34,7 @@ check_tool icc
 
 # Create output directory
 if [ ! -d $output_dir ]; then
-  mkdir -p $output_dir;
+  mkdir -p $output_dir
 fi
 
 # Clear .dacecache
@@ -46,13 +46,14 @@ input_dir=$(dirname $input_file)
 input_chrono="$input_dir/$input_name-chrono.c"
 current_dir=$(dirname $0)
 scripts_dir=$(dirname $0)/..
-timings_file=$output_dir/${input_name}_timings.csv; touch $timings_file
+timings_file=$output_dir/${input_name}_timings.csv
+touch $timings_file
 
 # Adds a value to the timings file, jumps to the next row after a write
 csv_line=1
-add_csv(){
+add_csv() {
   while [[ $(grep -c ^ $timings_file) < $csv_line ]]; do
-    echo '' >> $timings_file
+    echo '' >>$timings_file
   done
 
   if [ ! -z "$(sed "${csv_line}q;d" $timings_file)" ]; then
@@ -60,7 +61,7 @@ add_csv(){
   fi
 
   sed -i "${csv_line}s/$/$1/" "$timings_file"
-  csv_line=$((csv_line+1))
+  csv_line=$((csv_line + 1))
 }
 
 # Flags for the benchmark
@@ -70,8 +71,8 @@ opt_lvl_dc=3 # Optimization level for the data-centric optimizations
 
 # Dace Settings
 export DACE_compiler_cpu_executable="$(which clang++)"
-export CC=`which clang`
-export CXX=`which clang++`
+export CC=$(which clang)
+export CXX=$(which clang++)
 export DACE_compiler_cpu_openmp_sections=0
 export DACE_instrumentation_report_each_invocation=0
 export DACE_compiler_cpu_args="-fPIC -O$opt_lvl_cc -march=native"
@@ -79,20 +80,20 @@ export DACE_compiler_cpu_args="-fPIC -O$opt_lvl_cc -march=native"
 # Generating MLIR from C using Polygeist
 cgeist -resource-dir=$(clang-13 -print-resource-dir) -S --memref-fullrank \
   -O$opt_lvl_cc --raise-scf-to-affine $flags $input_file \
-  > $output_dir/${input_name}_cgeist.mlir
+  >$output_dir/${input_name}_cgeist.mlir
 
 # Optimizing with MLIR
-mlir-opt --affine-loop-invariant-code-motion $output_dir/${input_name}_cgeist.mlir | \
-mlir-opt --affine-scalrep | mlir-opt --lower-affine | \
-mlir-opt --cse --inline > $output_dir/${input_name}_opt.mlir
+mlir-opt --affine-loop-invariant-code-motion $output_dir/${input_name}_cgeist.mlir |
+  mlir-opt --affine-scalrep | mlir-opt --lower-affine |
+  mlir-opt --cse --inline >$output_dir/${input_name}_opt.mlir
 
 # Converting to DCIR
 sdfg-opt --convert-to-sdfg $output_dir/${input_name}_opt.mlir \
-  > $output_dir/${input_name}_sdfg.mlir
+  >$output_dir/${input_name}_sdfg.mlir
 
 # Translating to SDFG
 sdfg-translate --mlir-to-sdfg $output_dir/${input_name}_sdfg.mlir \
-  > $output_dir/$input_name.sdfg
+  >$output_dir/$input_name.sdfg
 
 # Optimizing data-centrically with DaCe
 python3 $scripts_dir/opt_sdfg.py $output_dir/$input_name.sdfg \
@@ -102,7 +103,7 @@ python3 $scripts_dir/opt_sdfg.py $output_dir/$input_name.sdfg \
 actual=$(python3 $current_dir/bench_dcir.py $output_dir/${input_name}_opt.sdfg 1 T)
 
 clang -O0 $flags -o $output_dir/${input_name}_clang_ref.out $input_chrono -lm
-$output_dir/${input_name}_clang_ref.out &> /dev/null
+$output_dir/${input_name}_clang_ref.out &>/dev/null
 reference=$?
 
 if [ "$actual" -ne "$reference" ]; then
@@ -118,6 +119,6 @@ add_csv "DCIR"
 
 for i in $(seq 1 $repetitions); do
   time=$(python3 $scripts_dir/get_sdfg_times.py \
-    $output_dir/${input_name}_opt.sdfg $((i-1)) F)
+    $output_dir/${input_name}_opt.sdfg $((i - 1)) F)
   add_csv "$time"
 done
