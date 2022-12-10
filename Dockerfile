@@ -2,7 +2,7 @@
 ### GENERAL SETUP
 ################################################################################
 
-FROM ubuntu:latest as llvm
+FROM ubuntu:22.04 as llvm
 
 # User directory
 ENV USER=user
@@ -10,8 +10,8 @@ ENV HOME=/home/user
 WORKDIR $HOME
 
 # Install dependencies
-RUN apt update -y && \ 
-  apt install -y \
+RUN apt-get update -y  && \ 
+  apt-get install -y --no-install-recommends \
   wget \
   git \
   cmake \
@@ -79,8 +79,7 @@ WORKDIR $HOME
 ################################################################################
 
 # Install python dependencies
-RUN pip install --upgrade pip
-RUN pip install --upgrade "jax[cpu]"
+RUN pip install --upgrade pip; pip install --upgrade "jax[cpu]"
 
 # Get MLIR-HLO
 RUN git clone --depth 1 --branch cgo23 https://github.com/Berke-Ates/mlir-hlo.git
@@ -140,9 +139,9 @@ RUN DESTDIR=$HOME/llvm-polygeist ninja install
 
 # Copy binaries
 WORKDIR $HOME/bin
-RUN cp $HOME/llvm-polygeist/usr/local/bin/cgeist .
-RUN cp $HOME/llvm-polygeist/usr/local/bin/mlir-opt .
-RUN cp $HOME/llvm-polygeist/usr/local/bin/mlir-translate .
+RUN cp $HOME/llvm-polygeist/usr/local/bin/cgeist .; \
+  cp $HOME/llvm-polygeist/usr/local/bin/mlir-opt .; \
+  cp $HOME/llvm-polygeist/usr/local/bin/mlir-translate .
 
 # Clean up build folders for space
 RUN rm -rf $HOME/Polygeist $HOME/llvm-polygeist
@@ -155,7 +154,7 @@ WORKDIR $HOME
 ################################################################################
 
 # Copy binaries
-FROM ubuntu:latest
+FROM ubuntu:22.04
 
 # User directory
 ENV USER=user
@@ -163,15 +162,14 @@ ENV HOME=/home/user
 WORKDIR $HOME
 
 # Move dotfiles
-RUN mv /root/.bashrc .
-RUN mv /root/.profile .
+RUN mv /root/.bashrc .; mv /root/.profile .
 
 # Make terminal colorful
 ENV TERM=xterm-color
 
 # Install dependencies
-RUN apt update -y && \ 
-  apt install -y \
+RUN apt-get update -y && \ 
+  apt-get install -y \
   wget \
   git \
   clang-13 \
@@ -182,15 +180,13 @@ RUN apt update -y && \
 ENTRYPOINT cd $HOME && bash
 
 # Dependencies for plotting
-RUN pip install --upgrade pip
-RUN pip install --upgrade seaborn
+RUN pip install --upgrade pip; pip install --upgrade seaborn
 
 # Copy Binaries
 COPY --from=llvm $HOME/bin $HOME/bin
 
 # Add clang copy
-RUN cp `which clang-13` $HOME/bin/clang
-RUN cp `which clang-13` $HOME/bin/clang++
+RUN cp $(which clang-13) $HOME/bin/clang; cp $(which clang-13) $HOME/bin/clang++
 
 # Add binaries to PATH
 ENV PATH=$HOME/bin:$PATH
@@ -208,8 +204,7 @@ WORKDIR $HOME/torch-mlir
 RUN git submodule update --init --recursive --depth 1
 
 # Install python dependencies
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip; pip install -r requirements.txt
 
 # Build torch-mlir in-tree
 WORKDIR $HOME/torch-mlir/build
@@ -253,7 +248,7 @@ RUN wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRO
 RUN echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
   | tee /etc/apt/sources.list.d/oneAPI.list
 
-RUN apt update -y && apt install -y intel-hpckit
+RUN apt-get update -y && apt-get install -y intel-hpckit
 
 RUN echo "source /opt/intel/oneapi/compiler/2022.2.1/env/vars.sh" >> $HOME/.bashrc
 
