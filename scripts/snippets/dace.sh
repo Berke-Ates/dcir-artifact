@@ -17,7 +17,7 @@ repetitions=$3
 
 # Check tools
 check_tool() {
-  if ! command -v $1 &>/dev/null; then
+  if ! command -v "$1" &>/dev/null; then
     echo "$1 could not be found"
     exit 1
   fi
@@ -28,32 +28,30 @@ check_tool python3
 check_tool icc
 
 # Create output directory
-if [ ! -d $output_dir ]; then
-  mkdir -p $output_dir
+if [ ! -d "$output_dir" ]; then
+  mkdir -p "$output_dir"
 fi
 
 # Clear .dacecache
 rm -rf .dacecache
 
 # Helpers
-input_name=$(basename ${input_file%.*})
-input_dir=$(dirname $input_file)
-input_chrono="$input_dir/$input_name-chrono.c"
-input_dace="$input_dir/$input_name.sdfg"
-current_dir=$(dirname $0)
-scripts_dir=$(dirname $0)/..
+input_name=$(basename "${input_file%.*}")
+input_dir=$(dirname "$input_file")
+current_dir=$(dirname "$0")
+scripts_dir=$(dirname "$0")/..
 timings_file=$output_dir/${input_name}_timings.csv
-touch $timings_file
+touch "$timings_file"
 
 # Adds a value to the timings file, jumps to the next row after a write
 csv_line=1
 add_csv() {
-  while [[ $(grep -c ^ $timings_file) < $csv_line ]]; do
-    echo '' >>$timings_file
+  while [[ $(grep -c ^ "$timings_file") < $csv_line ]]; do
+    echo '' >>"$timings_file"
   done
 
-  if [ ! -z "$(sed "${csv_line}q;d" $timings_file)" ]; then
-    sed -i "${csv_line}s/$/,/" $timings_file
+  if [ -n "$(sed "${csv_line}q;d" "$timings_file")" ]; then
+    sed -i "${csv_line}s/$/,/" "$timings_file"
   fi
 
   sed -i "${csv_line}s/$/$1/" "$timings_file"
@@ -61,7 +59,7 @@ add_csv() {
 }
 
 # Flags for the benchmark
-flags="-fPIC -march=native"
+opt_lvl_cc=3 # Optimization level for the control-centric optimizations
 opt_lvl_dc=3 # Optimization level for the data-centric optimizations
 
 # Lower optimization level for specific benchmarks
@@ -74,26 +72,29 @@ if [[ "$input_name" == "demo" ]]; then
 fi
 
 # Dace Settings
-export DACE_compiler_cpu_executable="$(which clang++)"
-export CC=$(which clang)
-export CXX=$(which clang++)
+DACE_compiler_cpu_executable="$(which clang++)"
+export DACE_compiler_cpu_executable
+CC=$(which clang)
+export CC
+CXX=$(which clang++)
+export CXX
 export DACE_compiler_cpu_openmp_sections=0
 export DACE_instrumentation_report_each_invocation=0
 export DACE_compiler_cpu_args="-fPIC -O$opt_lvl_cc -march=native"
 export PYTHONWARNINGS="ignore"
 
 # Optimizing data-centrically with DaCe
-python3 $scripts_dir/opt_sdfg.py $input_dir/${input_name}_c2dace.sdfg \
-  $output_dir/${input_name}_c2dace_opt.sdfg $opt_lvl_dc T
+python3 "$scripts_dir"/opt_sdfg.py "$input_dir"/"${input_name}"_c2dace.sdfg \
+  "$output_dir"/"${input_name}"_c2dace_opt.sdfg $opt_lvl_dc T
 
 # Running the benchmark
-OMP_NUM_THREADS=1 taskset -c 0 python3 $current_dir/bench_dace.py \
-  $output_dir/${input_name}_c2dace_opt.sdfg $repetitions
+OMP_NUM_THREADS=1 taskset -c 0 python3 "$current_dir"/bench_dace.py \
+  "$output_dir"/"${input_name}"_c2dace_opt.sdfg "$repetitions"
 
 add_csv "DaCe"
 
-for i in $(seq 1 $repetitions); do
-  time=$(python3 $scripts_dir/get_sdfg_times.py \
-    $output_dir/${input_name}_c2dace_opt.sdfg $((i - 1)) F)
+for i in $(seq 1 "$repetitions"); do
+  time=$(python3 "$scripts_dir"/get_sdfg_times.py \
+    "$output_dir"/"${input_name}"_c2dace_opt.sdfg $((i - 1)) F)
   add_csv "$time"
 done

@@ -15,17 +15,17 @@ output_dir=$1
 repetitions=$2
 
 # Create output directory
-if [ ! -d $output_dir ]; then
-  mkdir -p $output_dir
+if [ ! -d "$output_dir" ]; then
+  mkdir -p "$output_dir"
 fi
 
 # Silence Python warnings
 export PYTHONWARNINGS="ignore"
 
 # Helpers
-scripts_dir=$(dirname $0)
+scripts_dir=$(dirname "$0")
 
 # Run benchmarks
-./$scripts_dir/Polybench/run_all.sh "$output_dir" "$repetitions"
-./$scripts_dir/pytorch/run_all.sh "$output_dir" "$repetitions"
-./$scripts_dir/snippets/run_all.sh "$output_dir" "$repetitions"
+./"$scripts_dir"/Polybench/run_all.sh "$output_dir" "$repetitions"
+./"$scripts_dir"/pytorch/run_all.sh "$output_dir" "$repetitions"
+./"$scripts_dir"/snippets/run_all.sh "$output_dir" "$repetitions"

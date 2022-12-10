@@ -16,20 +16,20 @@ output_dir=$1
 repetitions=$2
 
 # Create output directory
-if [ ! -d $output_dir ]; then
-  mkdir -p $output_dir
+if [ ! -d "$output_dir" ]; then
+  mkdir -p "$output_dir"
 fi
 
 # Silence Python warnings
 export PYTHONWARNINGS="ignore"
 
 # Helpers
-runners_dir=$(dirname $0)
-scripts_dir=$(dirname $0)/..
-benchmarks_dir=$(dirname $0)/../../benchmarks/Polybench
+runners_dir=$(dirname "$0")
+scripts_dir=$(dirname "$0")/..
+benchmarks_dir=$(dirname "$0")/../../benchmarks/Polybench
 
 # Run benchmarks
-benchmarks=$(find $benchmarks_dir/* -name '*.c' -not -path "$benchmarks_dir/utilities/*")
+benchmarks=$(find "$benchmarks_dir"/* -name '*.c' -not -path "$benchmarks_dir/utilities/*")
 total=$(echo "$benchmarks" | wc -l)
 
 runners="$runners_dir/gcc.sh $runners_dir/clang.sh $runners_dir/dace.sh \
@@ -40,24 +40,24 @@ for runner in $runners; do
   echo "Running with: $runner"
 
   for benchmark in $benchmarks; do
-    bname="$(basename $benchmark .c)"
+    bname="$(basename "$benchmark" .c)"
     count=$((count + 1))
-    diff=$(($total - $count))
-    percent=$(($count * 100 / $total))
+    diff=$((total - count))
+    percent=$((count * 100 / total))
 
     prog=''
-    for i in $(seq 1 $count); do
+    for _ in $(seq 1 $count); do
       prog="$prog#"
     done
 
-    for i in $(seq 1 $diff); do
+    for _ in $(seq 1 $diff); do
       prog="$prog-"
     done
 
     echo -ne "\033[2K\r"
     echo -ne "$prog ($percent%) ($bname) "
 
-    $runner $benchmark $output_dir $repetitions
+    $runner "$benchmark" "$output_dir" "$repetitions"
   done
 
   echo ""
@@ -66,10 +66,10 @@ done
 csv_files=()
 
 for benchmark in $benchmarks; do
-  bname="$(basename $benchmark .c)"
+  bname="$(basename "$benchmark" .c)"
   mv "$output_dir/${bname}_timings.csv" "$output_dir/${bname}.csv"
   csv_files+=("$output_dir/${bname}.csv")
   cp "$output_dir/${bname}.csv" "$output_dir/fig6_${bname}.csv"
 done
 
-python3 $scripts_dir/multi_plot.py ${csv_files[*]} $output_dir/fig6.pdf
+python3 "$scripts_dir"/multi_plot.py ${csv_files[*]} "$output_dir"/fig6.pdf

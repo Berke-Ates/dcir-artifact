@@ -17,7 +17,7 @@ repetitions=$3
 
 # Check tools
 check_tool() {
-  if ! command -v $1 &>/dev/null; then
+  if ! command -v "$1" &>/dev/null; then
     echo "$1 could not be found"
     exit 1
   fi
@@ -28,29 +28,29 @@ check_tool gcc
 check_tool python3
 
 # Create output directory
-if [ ! -d $output_dir ]; then
-  mkdir -p $output_dir
+if [ ! -d "$output_dir" ]; then
+  mkdir -p "$output_dir"
 fi
 
 # Helpers
-input_name=$(basename ${input_file%.*})
-input_dir=$(dirname $input_file)
+input_name=$(basename "${input_file%.*}")
+input_dir=$(dirname "$input_file")
 utils_dir=$input_dir/../utilities
-scripts_dir=$(dirname $0)/..
+scripts_dir=$(dirname "$0")/..
 timings_file=$output_dir/${input_name}_timings.csv
-touch $timings_file
+touch "$timings_file"
 reference=$output_dir/${input_name}_reference.txt
 actual=$output_dir/${input_name}_actual_clang.txt
 
 # Adds a value to the timings file, jumps to the next row after a write
 csv_line=1
 add_csv() {
-  while [[ $(grep -c ^ $timings_file) < $csv_line ]]; do
-    echo '' >>$timings_file
+  while [[ $(grep -c ^ "$timings_file") < $csv_line ]]; do
+    echo '' >>"$timings_file"
   done
 
-  if [ ! -z "$(sed "${csv_line}q;d" $timings_file)" ]; then
-    sed -i "${csv_line}s/$/,/" $timings_file
+  if [ -n "$(sed "${csv_line}q;d" "$timings_file")" ]; then
+    sed -i "${csv_line}s/$/,/" "$timings_file"
   fi
 
   sed -i "${csv_line}s/$/$1/" "$timings_file"
@@ -67,22 +67,20 @@ if [[ "$input_name" == "gramschmidt" ]]; then
 fi
 
 # Compile
-clang -I $utils_dir -O$opt_lvl_cc $flags -o $output_dir/${input_name}_clang.out \
-  $input_file $utils_dir/polybench.c -lm
+clang -I "$utils_dir" -O$opt_lvl_cc $flags -o "$output_dir"/"${input_name}"_clang.out \
+  "$input_file" "$utils_dir"/polybench.c -lm
 
 # Check output
-clang -I $utils_dir -O$opt_lvl_cc $flags -DPOLYBENCH_DUMP_ARRAYS \
-  -o $output_dir/${input_name}_clang_dump.out $input_file $utils_dir/polybench.c -lm
+clang -I "$utils_dir" -O$opt_lvl_cc $flags -DPOLYBENCH_DUMP_ARRAYS \
+  -o "$output_dir"/"${input_name}"_clang_dump.out "$input_file" "$utils_dir"/polybench.c -lm
 
-gcc -I $utils_dir -O0 $flags -DPOLYBENCH_DUMP_ARRAYS \
-  -o $output_dir/${input_name}_gcc_ref.out $input_file $utils_dir/polybench.c -lm
+gcc -I "$utils_dir" -O0 $flags -DPOLYBENCH_DUMP_ARRAYS \
+  -o "$output_dir"/"${input_name}"_gcc_ref.out "$input_file" "$utils_dir"/polybench.c -lm
 
-$output_dir/${input_name}_clang_dump.out 2>$actual 1>/dev/null
-$output_dir/${input_name}_gcc_ref.out 2>$reference 1>/dev/null
+"$output_dir"/"${input_name}"_clang_dump.out 2>"$actual" 1>/dev/null
+"$output_dir"/"${input_name}"_gcc_ref.out 2>"$reference" 1>/dev/null
 
-python3 $scripts_dir/../polybench-comparator/comparator.py $reference $actual
-
-if [ $? -ne 0 ]; then
+if ! python3 "$scripts_dir"/../polybench-comparator/comparator.py "$reference" "$actual"; then
   echo "Output incorrect!"
   exit 1
 fi
@@ -90,7 +88,7 @@ fi
 # Running the benchmark
 add_csv "Clang"
 
-for i in $(seq 1 $repetitions); do
-  time=$(OMP_NUM_THREADS=1 taskset -c 0 ./$output_dir/${input_name}_clang.out)
+for _ in $(seq 1 "$repetitions"); do
+  time=$(OMP_NUM_THREADS=1 taskset -c 0 ./"$output_dir"/"${input_name}"_clang.out)
   add_csv "$time"
 done

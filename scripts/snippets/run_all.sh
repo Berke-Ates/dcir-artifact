@@ -16,20 +16,20 @@ output_dir=$1
 repetitions=$2
 
 # Create output directory
-if [ ! -d $output_dir ]; then
-  mkdir -p $output_dir
+if [ ! -d "$output_dir" ]; then
+  mkdir -p "$output_dir"
 fi
 
 # Silence Python warnings
 export PYTHONWARNINGS="ignore"
 
 # Helpers
-runners_dir=$(dirname $0)
-scripts_dir=$(dirname $0)/..
-benchmarks_dir=$(dirname $0)/../../benchmarks/snippets
+runners_dir=$(dirname "$0")
+scripts_dir=$(dirname "$0")/..
+benchmarks_dir=$(dirname "$0")/../../benchmarks/snippets
 
 # Run benchmarks
-benchmarks=$(find $benchmarks_dir/* -name '*.c' -not -name '*-chrono.c')
+benchmarks=$(find "$benchmarks_dir"/* -name '*.c' -not -name '*-chrono.c')
 total=$(echo "$benchmarks" | wc -l)
 
 runners="$runners_dir/gcc.sh $runners_dir/clang.sh $runners_dir/dace.sh \
@@ -40,31 +40,31 @@ for runner in $runners; do
   echo "Running with: $runner"
 
   for benchmark in $benchmarks; do
-    bname="$(basename $benchmark .c)"
+    bname="$(basename "$benchmark" .c)"
     count=$((count + 1))
-    diff=$(($total - $count))
-    percent=$(($count * 100 / $total))
+    diff=$((total - count))
+    percent=$((count * 100 / total))
 
     prog=''
-    for i in $(seq 1 $count); do
+    for _ in $(seq 1 $count); do
       prog="$prog#"
     done
 
-    for i in $(seq 1 $diff); do
+    for _ in $(seq 1 $diff); do
       prog="$prog-"
     done
 
     echo -ne "\033[2K\r"
     echo -ne "$prog ($percent%) ($bname) "
 
-    $runner $benchmark $output_dir $repetitions
+    $runner "$benchmark" "$output_dir" "$repetitions"
   done
 
   echo ""
 done
 
 for benchmark in $benchmarks; do
-  bname="$(basename $benchmark .c)"
+  bname="$(basename "$benchmark" .c)"
 
   if [[ "$bname" == "demo" ]]; then
     fig_num=2
@@ -83,6 +83,6 @@ for benchmark in $benchmarks; do
   fi
 
   mv "$output_dir/${bname}_timings.csv" "$output_dir/fig${fig_num}.csv"
-  python3 $scripts_dir/single_plot.py "$output_dir/fig${fig_num}.csv" \
-    $output_dir/fig$fig_num.pdf
+  python3 "$scripts_dir"/single_plot.py "$output_dir/fig${fig_num}.csv" \
+    "$output_dir"/fig$fig_num.pdf
 done
