@@ -16,10 +16,10 @@ output_dir=$2
 repetitions=$3
 
 # Check tools
-check_tool(){
-  if ! command -v $1 &> /dev/null; then
-      echo "$1 could not be found"
-      exit 1
+check_tool() {
+  if ! command -v $1 &>/dev/null; then
+    echo "$1 could not be found"
+    exit 1
   fi
 }
 
@@ -29,7 +29,7 @@ check_tool icc
 
 # Create output directory
 if [ ! -d $output_dir ]; then
-  mkdir -p $output_dir;
+  mkdir -p $output_dir
 fi
 
 # Clear .dacecache
@@ -42,13 +42,14 @@ input_chrono="$input_dir/$input_name-chrono.c"
 input_dace="$input_dir/$input_name.sdfg"
 current_dir=$(dirname $0)
 scripts_dir=$(dirname $0)/..
-timings_file=$output_dir/${input_name}_timings.csv; touch $timings_file
+timings_file=$output_dir/${input_name}_timings.csv
+touch $timings_file
 
 # Adds a value to the timings file, jumps to the next row after a write
 csv_line=1
-add_csv(){
+add_csv() {
   while [[ $(grep -c ^ $timings_file) < $csv_line ]]; do
-    echo '' >> $timings_file
+    echo '' >>$timings_file
   done
 
   if [ ! -z "$(sed "${csv_line}q;d" $timings_file)" ]; then
@@ -56,7 +57,7 @@ add_csv(){
   fi
 
   sed -i "${csv_line}s/$/$1/" "$timings_file"
-  csv_line=$((csv_line+1))
+  csv_line=$((csv_line + 1))
 }
 
 # Flags for the benchmark
@@ -74,8 +75,8 @@ fi
 
 # Dace Settings
 export DACE_compiler_cpu_executable="$(which clang++)"
-export CC=`which clang`
-export CXX=`which clang++`
+export CC=$(which clang)
+export CXX=$(which clang++)
 export DACE_compiler_cpu_openmp_sections=0
 export DACE_instrumentation_report_each_invocation=0
 export DACE_compiler_cpu_args="-fPIC -O$opt_lvl_cc -march=native"
@@ -92,7 +93,6 @@ add_csv "DaCe"
 
 for i in $(seq 1 $repetitions); do
   time=$(python3 $scripts_dir/get_sdfg_times.py \
-    $output_dir/${input_name}_c2dace_opt.sdfg $((i-1)) F) 
+    $output_dir/${input_name}_c2dace_opt.sdfg $((i - 1)) F)
   add_csv "$time"
 done
-

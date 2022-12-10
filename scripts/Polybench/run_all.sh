@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Desc: Runs all Polybench benchmarks using GCC, Clang, Polygeist + MLIR, DCIR 
-# and DaCe. The output contains any intermediate results and the times in the 
+# Desc: Runs all Polybench benchmarks using GCC, Clang, Polygeist + MLIR, DCIR
+# and DaCe. The output contains any intermediate results and the times in the
 # CSV format as well as a plot with all the benchmarks.
 # Usage: ./run_all.sh <Output Dir> <Repetitions>
 
@@ -17,7 +17,7 @@ repetitions=$2
 
 # Create output directory
 if [ ! -d $output_dir ]; then
-  mkdir -p $output_dir;
+  mkdir -p $output_dir
 fi
 
 # Helpers
@@ -37,24 +37,24 @@ for runner in $runners; do
   echo "Running with: $runner"
 
   for benchmark in $benchmarks; do
-      bname="$(basename $benchmark .c)"
-      count=$((count+1))
-      diff=$(($total - $count))
-      percent=$(($count * 100 / $total))
+    bname="$(basename $benchmark .c)"
+    count=$((count + 1))
+    diff=$(($total - $count))
+    percent=$(($count * 100 / $total))
 
-      prog=''
-      for i in $(seq 1 $count); do
-        prog="$prog#"
-      done
+    prog=''
+    for i in $(seq 1 $count); do
+      prog="$prog#"
+    done
 
-      for i in $(seq 1 $diff); do
-        prog="$prog-"
-      done
+    for i in $(seq 1 $diff); do
+      prog="$prog-"
+    done
 
-      echo -ne "\033[2K\r"
-      echo -ne "$prog ($percent%) ($bname) "
-      
-      $runner $benchmark $output_dir $repetitions
+    echo -ne "\033[2K\r"
+    echo -ne "$prog ($percent%) ($bname) "
+
+    $runner $benchmark $output_dir $repetitions
   done
 
   echo ""
@@ -63,10 +63,10 @@ done
 csv_files=()
 
 for benchmark in $benchmarks; do
-    bname="$(basename $benchmark .c)"
-    mv "$output_dir/${bname}_timings.csv" "$output_dir/${bname}.csv"
-    csv_files+=("$output_dir/${bname}.csv")
-    cp "$output_dir/${bname}.csv" "$output_dir/fig6_${bname}.csv"
+  bname="$(basename $benchmark .c)"
+  mv "$output_dir/${bname}_timings.csv" "$output_dir/${bname}.csv"
+  csv_files+=("$output_dir/${bname}.csv")
+  cp "$output_dir/${bname}.csv" "$output_dir/fig6_${bname}.csv"
 done
 
 python3 $scripts_dir/multi_plot.py ${csv_files[*]} $output_dir/fig6.pdf

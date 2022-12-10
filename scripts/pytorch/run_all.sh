@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Desc: Runs all pytorch benchmarks using PyTorch, Torch-MLIR and DCIR. The 
-# output contains any intermediate results and the times in the CSV format as 
+# Desc: Runs all pytorch benchmarks using PyTorch, Torch-MLIR and DCIR. The
+# output contains any intermediate results and the times in the CSV format as
 # well as all the plots.
 # Usage: ./run_all.sh <Output Dir> <Repetitions>
 
@@ -17,7 +17,7 @@ repetitions=$2
 
 # Create output directory
 if [ ! -d $output_dir ]; then
-  mkdir -p $output_dir;
+  mkdir -p $output_dir
 fi
 
 # Helpers
@@ -36,33 +36,33 @@ for runner in $runners; do
   echo "Running with: $runner"
 
   for benchmark in $benchmarks; do
-      bname="$(basename $benchmark .c)"
-      count=$((count+1))
-      diff=$(($total - $count))
-      percent=$(($count * 100 / $total))
+    bname="$(basename $benchmark .c)"
+    count=$((count + 1))
+    diff=$(($total - $count))
+    percent=$(($count * 100 / $total))
 
-      prog=''
-      for i in $(seq 1 $count); do
-        prog="$prog#"
-      done
+    prog=''
+    for i in $(seq 1 $count); do
+      prog="$prog#"
+    done
 
-      for i in $(seq 1 $diff); do
-        prog="$prog-"
-      done
+    for i in $(seq 1 $diff); do
+      prog="$prog-"
+    done
 
-      echo -ne "\033[2K\r"
-      echo -ne "$prog ($percent%) ($bname) "
-      
-      $runner $benchmark $output_dir $repetitions
+    echo -ne "\033[2K\r"
+    echo -ne "$prog ($percent%) ($bname) "
+
+    $runner $benchmark $output_dir $repetitions
   done
 
   echo ""
 done
 
 for benchmark in $benchmarks; do
-    bench_dir=$(dirname $benchmark)
-    bench_name=$(basename $bench_dir)
-    mv "$output_dir/${bench_name}_timings.csv" "$output_dir/${bench_name}.csv"
-    python3 $scripts_dir/single_plot.py "$output_dir/${bench_name}.csv" \
-      $output_dir/$bench_name.pdf
+  bench_dir=$(dirname $benchmark)
+  bench_name=$(basename $bench_dir)
+  mv "$output_dir/${bench_name}_timings.csv" "$output_dir/${bench_name}.csv"
+  python3 $scripts_dir/single_plot.py "$output_dir/${bench_name}.csv" \
+    $output_dir/$bench_name.pdf
 done

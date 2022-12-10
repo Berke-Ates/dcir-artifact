@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Desc: Runs all the benchmarks. The output contains any intermediate results 
+# Desc: Runs all the benchmarks. The output contains any intermediate results
 # and the times in the CSV format as well as all the plots.
 # Usage: ./run_all.sh <Output Dir> <Repetitions>
 
@@ -16,7 +16,7 @@ repetitions=$2
 
 # Create output directory
 if [ ! -d $output_dir ]; then
-  mkdir -p $output_dir;
+  mkdir -p $output_dir
 fi
 
 # Helpers
