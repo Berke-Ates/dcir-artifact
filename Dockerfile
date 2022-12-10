@@ -10,7 +10,7 @@ ENV HOME=/home/user
 WORKDIR $HOME
 
 # Install dependencies
-RUN apt-get update -y  && \ 
+RUN apt-get update -y && \ 
   apt-get install -y --no-install-recommends \
   wget \
   git \
@@ -79,7 +79,7 @@ WORKDIR $HOME
 ################################################################################
 
 # Install python dependencies
-RUN pip install --upgrade pip; pip install --upgrade "jax[cpu]"
+RUN pip install --upgrade pip && pip install --upgrade "jax[cpu]"
 
 # Get MLIR-HLO
 RUN git clone --depth 1 --branch cgo23 https://github.com/Berke-Ates/mlir-hlo.git
@@ -139,8 +139,8 @@ RUN DESTDIR=$HOME/llvm-polygeist ninja install
 
 # Copy binaries
 WORKDIR $HOME/bin
-RUN cp $HOME/llvm-polygeist/usr/local/bin/cgeist .; \
-  cp $HOME/llvm-polygeist/usr/local/bin/mlir-opt .; \
+RUN cp $HOME/llvm-polygeist/usr/local/bin/cgeist . && \
+  cp $HOME/llvm-polygeist/usr/local/bin/mlir-opt . && \
   cp $HOME/llvm-polygeist/usr/local/bin/mlir-translate .
 
 # Clean up build folders for space
@@ -162,7 +162,7 @@ ENV HOME=/home/user
 WORKDIR $HOME
 
 # Move dotfiles
-RUN mv /root/.bashrc .; mv /root/.profile .
+RUN mv /root/.bashrc . && mv /root/.profile .
 
 # Make terminal colorful
 ENV TERM=xterm-color
@@ -180,13 +180,14 @@ RUN apt-get update -y && \
 ENTRYPOINT cd $HOME && bash
 
 # Dependencies for plotting
-RUN pip install --upgrade pip; pip install --upgrade seaborn
+RUN pip install --upgrade pip && pip install --upgrade seaborn
 
 # Copy Binaries
 COPY --from=llvm $HOME/bin $HOME/bin
 
 # Add clang copy
-RUN cp $(which clang-13) $HOME/bin/clang; cp $(which clang-13) $HOME/bin/clang++
+RUN cp $(which clang-13) $HOME/bin/clang && \ 
+  cp $(which clang-13) $HOME/bin/clang++
 
 # Add binaries to PATH
 ENV PATH=$HOME/bin:$PATH
@@ -204,7 +205,7 @@ WORKDIR $HOME/torch-mlir
 RUN git submodule update --init --recursive --depth 1
 
 # Install python dependencies
-RUN pip install --upgrade pip; pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
 # Build torch-mlir in-tree
 WORKDIR $HOME/torch-mlir/build
