@@ -38,8 +38,7 @@ def add_median_labels(ax, precision='.2f'):
                 ha='center',
                 va='bottom',
                 fontweight='bold',
-                color='black',
-                fontfamily='Arial')
+                color='black')
 
 
 dt = pd.read_csv(input_file)
