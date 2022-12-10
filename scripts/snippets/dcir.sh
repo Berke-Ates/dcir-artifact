@@ -76,6 +76,7 @@ export CXX=$(which clang++)
 export DACE_compiler_cpu_openmp_sections=0
 export DACE_instrumentation_report_each_invocation=0
 export DACE_compiler_cpu_args="-fPIC -O$opt_lvl_cc -march=native"
+export PYTHONWARNINGS="ignore"
 
 # Generating MLIR from C using Polygeist
 cgeist -resource-dir=$(clang-13 -print-resource-dir) -S --memref-fullrank \

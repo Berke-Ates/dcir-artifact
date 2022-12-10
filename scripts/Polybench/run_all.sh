@@ -20,6 +20,9 @@ if [ ! -d $output_dir ]; then
   mkdir -p $output_dir
 fi
 
+# Silence Python warnings
+export PYTHONWARNINGS="ignore"
+
 # Helpers
 runners_dir=$(dirname $0)
 scripts_dir=$(dirname $0)/..

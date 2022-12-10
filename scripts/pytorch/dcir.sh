@@ -71,6 +71,7 @@ export CXX=$(which icc)
 export DACE_compiler_cpu_openmp_sections=0
 export DACE_instrumentation_report_each_invocation=0
 export DACE_compiler_cpu_args="-fPIC -O3 -march=native"
+export PYTHONWARNINGS="ignore"
 
 # Generating MLIR using Torch-MLIR
 python3 $gen_file >$output_dir/${input_name}_mhlo.mlir

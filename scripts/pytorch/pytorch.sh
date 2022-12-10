@@ -30,6 +30,9 @@ if [ ! -d $output_dir ]; then
   mkdir -p $output_dir
 fi
 
+# Silence Python warnings
+export PYTHONWARNINGS="ignore"
+
 # Helpers
 input_dir=$(dirname $input_file)
 input_name=$(basename $input_dir)

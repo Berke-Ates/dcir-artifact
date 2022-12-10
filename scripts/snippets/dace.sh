@@ -80,6 +80,7 @@ export CXX=$(which clang++)
 export DACE_compiler_cpu_openmp_sections=0
 export DACE_instrumentation_report_each_invocation=0
 export DACE_compiler_cpu_args="-fPIC -O$opt_lvl_cc -march=native"
+export PYTHONWARNINGS="ignore"
 
 # Optimizing data-centrically with DaCe
 python3 $scripts_dir/opt_sdfg.py $input_dir/${input_name}_c2dace.sdfg \
