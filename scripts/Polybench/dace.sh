@@ -101,7 +101,7 @@ python3 "$scripts_dir"/opt_sdfg.py "$input_dir"/"${input_name}"_c2dace.sdfg \
 
 # Running the benchmark
 OMP_NUM_THREADS=1 taskset -c 0 python3 "$current_dir"/bench_dace.py \
-  "$output_dir"/"${input_name}"_c2dace_opt.sdfg "$repetitions"
+  "$output_dir"/"${input_name}"_c2dace_opt.sdfg "$repetitions" &> /dev/null
 
 add_csv "DaCe"
 

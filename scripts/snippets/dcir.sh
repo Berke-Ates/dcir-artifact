@@ -106,7 +106,7 @@ python3 "$scripts_dir"/opt_sdfg.py "$output_dir"/"$input_name".sdfg \
 # Check output
 actual=$(python3 "$current_dir"/bench_dcir.py "$output_dir"/"${input_name}"_opt.sdfg 1 T)
 
-clang -O0 $flags -o "$output_dir"/"${input_name}"_clang_ref.out "$input_chrono" -lm
+clang -O0 $flags -o "$output_dir"/"${input_name}"_clang_ref.out "$input_chrono" -lm &> /dev/null
 "$output_dir"/"${input_name}"_clang_ref.out &>/dev/null
 reference=$?
 

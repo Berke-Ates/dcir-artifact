@@ -39,7 +39,9 @@ for runner in $runners; do
   echo "Running with: $runner"
 
   for benchmark in $benchmarks; do
-    bname="$(basename "$benchmark" .c)"
+    bench_dir=$(dirname "$benchmark")
+    bench_name=$(basename "$bench_dir")
+
     count=$((count + 1))
     diff=$((total - count))
     percent=$((count * 100 / total))
@@ -54,7 +56,7 @@ for runner in $runners; do
     done
 
     echo -ne "\033[2K\r"
-    echo -ne "$prog ($percent%) ($bname) "
+    echo -ne "$prog ($percent%) ($bench_name) "
 
     $runner "$benchmark" "$output_dir" "$repetitions"
   done

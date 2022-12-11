@@ -59,10 +59,10 @@ flags="-fPIC -march=native"
 opt_lvl_cc=3 # Optimization level for the control-centric optimizations
 
 # Compile
-clang -O$opt_lvl_cc $flags -o "$output_dir"/"${input_name}"_clang.out "$input_chrono" -lm
+clang -O$opt_lvl_cc $flags -o "$output_dir"/"${input_name}"_clang.out "$input_chrono" -lm &> /dev/null
 
 # Check output
-gcc -O0 $flags -o "$output_dir"/"${input_name}"_gcc_ref.out "$input_chrono" -lm
+gcc -O0 $flags -o "$output_dir"/"${input_name}"_gcc_ref.out "$input_chrono" -lm &> /dev/null
 
 "$output_dir"/"${input_name}"_clang.out &>/dev/null
 actual=$?
