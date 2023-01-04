@@ -4,6 +4,11 @@
 #       any intermediate results and the times in the CSV format
 # Usage: ./mlir.sh <Benchmark File> <Output Dir> <Repetitions>
 
+# Be safe
+set -e          # Fail script when subcommand fails
+set -u          # Disallow using undefined variables
+set -o pipefail # Prevent errors from being masked
+
 # Check args
 if [ $# -ne 3 ]; then
   echo "Usage: ./mlir.sh <Benchmark File> <Output Dir> <Repetitions>"
@@ -49,7 +54,7 @@ actual=$output_dir/${input_name}_actual_mlir.txt
 # Adds a value to the timings file, jumps to the next row after a write
 csv_line=1
 add_csv() {
-  while [[ $(grep -c ^ "$timings_file") < $csv_line ]]; do
+  while [[ $(grep -c ^ "$timings_file") -lt $csv_line ]]; do
     echo '' >>"$timings_file"
   done
 
@@ -76,6 +81,7 @@ compile_with_mlir() {
   output_name=$2
 
   # Generating MLIR from C using Polygeist
+  # shellcheck disable=SC2086
   cgeist -resource-dir="$(clang-13 -print-resource-dir)" -I "$utils_dir" \
     -S --memref-fullrank -O$opt_lvl_cc --raise-scf-to-affine $flags \
     $additional_flags "$input_file" >"$output_dir"/"${output_name}"_cgeist.mlir
@@ -100,6 +106,7 @@ compile_with_mlir() {
     -o "$output_dir"/"${output_name}".s
 
   # Assemble
+  # shellcheck disable=SC2086
   clang -O$opt_lvl_cc $flags $additional_flags "$output_dir"/"${output_name}".s \
     "$utils_dir"/polybench.c -o "$output_dir"/"${output_name}".out -lm
 }
@@ -110,6 +117,7 @@ compile_with_mlir "" "${input_name}_mlir"
 # Check output
 compile_with_mlir "-DPOLYBENCH_DUMP_ARRAYS" "${input_name}_mlir_dump"
 
+# shellcheck disable=SC2086
 gcc -I "$utils_dir" -O0 $flags -DPOLYBENCH_DUMP_ARRAYS \
   -o "$output_dir"/"${input_name}"_clang_ref.out "$input_file" "$utils_dir"/polybench.c -lm
 

@@ -5,6 +5,11 @@
 # CSV format as well as a plot with all the benchmarks.
 # Usage: ./run_all.sh <Output Dir> <Repetitions>
 
+# Be safe
+set -e          # Fail script when subcommand fails
+set -u          # Disallow using undefined variables
+set -o pipefail # Prevent errors from being masked
+
 # Check args
 if [ $# -ne 2 ]; then
   echo "Usage: ./run_all.sh <Output Dir> <Repetitions>"
@@ -72,4 +77,5 @@ for benchmark in $benchmarks; do
   cp "$output_dir/${bname}.csv" "$output_dir/fig6_${bname}.csv"
 done
 
+# shellcheck disable=SC2086,SC2048
 python3 "$scripts_dir"/multi_plot.py ${csv_files[*]} "$output_dir"/fig6.pdf

@@ -4,6 +4,11 @@
 #       intermediate results and the times in the CSV format
 # Usage: ./clang.sh <Benchmark File> <Output Dir> <Repetitions>
 
+# Be safe
+set -e          # Fail script when subcommand fails
+set -u          # Disallow using undefined variables
+set -o pipefail # Prevent errors from being masked
+
 # Check args
 if [ $# -ne 3 ]; then
   echo "Usage: ./clang.sh <Benchmark File> <Output Dir> <Repetitions>"
@@ -25,7 +30,6 @@ check_tool() {
 
 check_tool clang
 check_tool gcc
-check_tool python3
 
 # Create output directory
 if [ ! -d "$output_dir" ]; then
@@ -42,7 +46,7 @@ touch "$timings_file"
 # Adds a value to the timings file, jumps to the next row after a write
 csv_line=1
 add_csv() {
-  while [[ $(grep -c ^ "$timings_file") < $csv_line ]]; do
+  while [[ $(grep -c ^ "$timings_file") -lt $csv_line ]]; do
     echo '' >>"$timings_file"
   done
 
@@ -59,15 +63,19 @@ flags="-fPIC -march=native"
 opt_lvl_cc=3 # Optimization level for the control-centric optimizations
 
 # Compile
-clang -O$opt_lvl_cc $flags -o "$output_dir"/"${input_name}"_clang.out "$input_chrono" -lm &> /dev/null
+# shellcheck disable=SC2086
+clang -O$opt_lvl_cc $flags -o "$output_dir"/"${input_name}"_clang.out "$input_chrono" -lm &>/dev/null
 
 # Check output
-gcc -O0 $flags -o "$output_dir"/"${input_name}"_gcc_ref.out "$input_chrono" -lm &> /dev/null
+# shellcheck disable=SC2086
+gcc -O0 $flags -o "$output_dir"/"${input_name}"_gcc_ref.out "$input_chrono" -lm &>/dev/null
 
+set +e
 "$output_dir"/"${input_name}"_clang.out &>/dev/null
 actual=$?
 "$output_dir"/"${input_name}"_gcc_ref.out &>/dev/null
 reference=$?
+set -e
 
 if [ "$actual" -ne "$reference" ]; then
   echo "Output incorrect!"
@@ -78,6 +86,8 @@ fi
 add_csv "Clang"
 
 for _ in $(seq 1 "$repetitions"); do
+  set +e
   time=$(OMP_NUM_THREADS=1 taskset -c 0 ./"$output_dir"/"${input_name}"_clang.out)
+  set -e
   add_csv "$time"
 done

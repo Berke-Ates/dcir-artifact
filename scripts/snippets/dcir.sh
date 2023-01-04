@@ -4,6 +4,11 @@
 #       intermediate results and the times in the CSV format
 # Usage: ./dcir.sh <Benchmark File> <Output Dir> <Repetitions>
 
+# Be safe
+set -e          # Fail script when subcommand fails
+set -u          # Disallow using undefined variables
+set -o pipefail # Prevent errors from being masked
+
 # Check args
 if [ $# -ne 3 ]; then
   echo "Usage: ./dcir.sh <Benchmark File> <Output Dir> <Repetitions>"
@@ -24,13 +29,13 @@ check_tool() {
 }
 
 check_tool clang
+check_tool clang++
 check_tool clang-13
 check_tool cgeist
 check_tool mlir-opt
 check_tool sdfg-opt
 check_tool sdfg-translate
 check_tool python3
-check_tool icc
 
 # Create output directory
 if [ ! -d "$output_dir" ]; then
@@ -52,7 +57,7 @@ touch "$timings_file"
 # Adds a value to the timings file, jumps to the next row after a write
 csv_line=1
 add_csv() {
-  while [[ $(grep -c ^ "$timings_file") < $csv_line ]]; do
+  while [[ $(grep -c ^ "$timings_file") -lt $csv_line ]]; do
     echo '' >>"$timings_file"
   done
 
@@ -82,6 +87,7 @@ export DACE_compiler_cpu_args="-fPIC -O$opt_lvl_cc -march=native"
 export PYTHONWARNINGS="ignore"
 
 # Generating MLIR from C using Polygeist
+# shellcheck disable=SC2086
 cgeist -resource-dir="$(clang-13 -print-resource-dir)" -S --memref-fullrank \
   -O$opt_lvl_cc --raise-scf-to-affine $flags "$input_file" \
   >"$output_dir"/"${input_name}"_cgeist.mlir
@@ -106,9 +112,12 @@ python3 "$scripts_dir"/opt_sdfg.py "$output_dir"/"$input_name".sdfg \
 # Check output
 actual=$(python3 "$current_dir"/bench_dcir.py "$output_dir"/"${input_name}"_opt.sdfg 1 T)
 
-clang -O0 $flags -o "$output_dir"/"${input_name}"_clang_ref.out "$input_chrono" -lm &> /dev/null
+# shellcheck disable=SC2086
+clang -O0 $flags -o "$output_dir"/"${input_name}"_clang_ref.out "$input_chrono" -lm &>/dev/null
+set +e
 "$output_dir"/"${input_name}"_clang_ref.out &>/dev/null
 reference=$?
+set -e
 
 if [ "$actual" -ne "$reference" ]; then
   echo "Output incorrect!"

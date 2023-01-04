@@ -4,6 +4,11 @@
 #       intermediate results and the times in the CSV format
 # Usage: ./clang.sh <Benchmark File> <Output Dir> <Repetitions>
 
+# Be safe
+set -e          # Fail script when subcommand fails
+set -u          # Disallow using undefined variables
+set -o pipefail # Prevent errors from being masked
+
 # Check args
 if [ $# -ne 3 ]; then
   echo "Usage: ./clang.sh <Benchmark File> <Output Dir> <Repetitions>"
@@ -45,7 +50,7 @@ actual=$output_dir/${input_name}_actual_clang.txt
 # Adds a value to the timings file, jumps to the next row after a write
 csv_line=1
 add_csv() {
-  while [[ $(grep -c ^ "$timings_file") < $csv_line ]]; do
+  while [[ $(grep -c ^ "$timings_file") -lt $csv_line ]]; do
     echo '' >>"$timings_file"
   done
 
@@ -67,13 +72,16 @@ if [[ "$input_name" == "gramschmidt" ]]; then
 fi
 
 # Compile
+# shellcheck disable=SC2086
 clang -I "$utils_dir" -O$opt_lvl_cc $flags -o "$output_dir"/"${input_name}"_clang.out \
   "$input_file" "$utils_dir"/polybench.c -lm
 
 # Check output
+# shellcheck disable=SC2086
 clang -I "$utils_dir" -O$opt_lvl_cc $flags -DPOLYBENCH_DUMP_ARRAYS \
   -o "$output_dir"/"${input_name}"_clang_dump.out "$input_file" "$utils_dir"/polybench.c -lm
 
+# shellcheck disable=SC2086
 gcc -I "$utils_dir" -O0 $flags -DPOLYBENCH_DUMP_ARRAYS \
   -o "$output_dir"/"${input_name}"_gcc_ref.out "$input_file" "$utils_dir"/polybench.c -lm
 

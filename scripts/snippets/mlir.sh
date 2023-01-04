@@ -4,6 +4,11 @@
 #       any intermediate results and the times in the CSV format
 # Usage: ./mlir.sh <Benchmark File> <Output Dir> <Repetitions>
 
+# Be safe
+set -e          # Fail script when subcommand fails
+set -u          # Disallow using undefined variables
+set -o pipefail # Prevent errors from being masked
+
 # Check args
 if [ $# -ne 3 ]; then
   echo "Usage: ./mlir.sh <Benchmark File> <Output Dir> <Repetitions>"
@@ -29,7 +34,6 @@ check_tool clang-13
 check_tool cgeist
 check_tool mlir-opt
 check_tool mlir-translate
-check_tool python3
 
 # Create output directory
 if [ ! -d "$output_dir" ]; then
@@ -46,11 +50,11 @@ touch "$timings_file"
 # Adds a value to the timings file, jumps to the next row after a write
 csv_line=1
 add_csv() {
-  while [[ $(grep -c ^ "$timings_file") < $csv_line ]]; do
+  while [[ $(grep -c ^ "$timings_file") -lt $csv_line ]]; do
     echo '' >>"$timings_file"
   done
 
-  if [ ! -z "$(sed "${csv_line}q;d" "$timings_file")" ]; then
+  if [ -n "$(sed "${csv_line}q;d" "$timings_file")" ]; then
     sed -i "${csv_line}s/$/,/" "$timings_file"
   fi
 
@@ -68,6 +72,7 @@ compile_with_mlir() {
   output_name=$2
 
   # Generating MLIR from C using Polygeist
+  # shellcheck disable=SC2086
   cgeist -resource-dir="$(clang-13 -print-resource-dir)" \
     -S --memref-fullrank -O$opt_lvl_cc --raise-scf-to-affine $flags \
     $additional_flags "$input_chrono" >"$output_dir"/"${output_name}"_cgeist.mlir
@@ -92,6 +97,7 @@ compile_with_mlir() {
     -o "$output_dir"/"${output_name}".s
 
   # Assemble
+  # shellcheck disable=SC2086
   clang -O$opt_lvl_cc $flags $additional_flags "$output_dir"/"${output_name}".s \
     -o "$output_dir"/"${output_name}".out -lm
 }
@@ -100,12 +106,15 @@ compile_with_mlir() {
 compile_with_mlir "" "${input_name}_mlir"
 
 # Check output
-clang -O0 $flags -o "$output_dir"/"${input_name}"_clang_ref.out "$input_file" -lm &> /dev/null
+# shellcheck disable=SC2086
+clang -O0 $flags -o "$output_dir"/"${input_name}"_clang_ref.out "$input_file" -lm &>/dev/null
 
+set +e
 "$output_dir"/"${input_name}"_mlir.out &>/dev/null
 actual=$?
 "$output_dir"/"${input_name}"_clang_ref.out &>/dev/null
 reference=$?
+set -e
 
 if [ "$actual" -ne "$reference" ]; then
   echo "Output incorrect!"
@@ -116,6 +125,8 @@ fi
 add_csv "Polygeist + MLIR"
 
 for _ in $(seq 1 "$repetitions"); do
+  set +e
   time=$(OMP_NUM_THREADS=1 taskset -c 0 ./"$output_dir"/"${input_name}"_mlir.out)
+  set -e
   add_csv "$time"
 done

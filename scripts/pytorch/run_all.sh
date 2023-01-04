@@ -5,6 +5,11 @@
 # well as all the plots.
 # Usage: ./run_all.sh <Output Dir> <Repetitions>
 
+# Be safe
+set -e          # Fail script when subcommand fails
+set -u          # Disallow using undefined variables
+set -o pipefail # Prevent errors from being masked
+
 # Check args
 if [ $# -ne 2 ]; then
   echo "Usage: ./run_all.sh <Output Dir> <Repetitions>"
