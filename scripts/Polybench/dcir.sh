@@ -128,6 +128,7 @@ python3 "$scripts_dir"/opt_sdfg.py "$output_dir"/"$input_name".sdfg \
   "$output_dir"/"${input_name}"_opt.sdfg $opt_lvl_dc T
 
 # Check output
+# shellcheck disable=SC2086
 gcc -I "$utils_dir" -O0 $flags -DPOLYBENCH_DUMP_ARRAYS \
   -o "$output_dir"/"${input_name}"_gcc_ref.out "$input_file" "$utils_dir"/polybench.c -lm
 
@@ -138,21 +139,24 @@ python3 "$current_dir"/bench_dcir.py "$output_dir"/"${input_name}"_opt.sdfg 1 T 
 touch "$output_dir"/arr_names.txt
 
 grep "begin dump:" "$reference" | while read -r line; do
+  # shellcheck disable=SC2206
   arr_tmp=($line)
   arr_name=${arr_tmp[2]}
   echo -n "$arr_name " >>"$output_dir"/arr_names.txt
 done
 
-arr_names=($(cat $output_dir/arr_names.txt))
+mapfile -t -d " " arr_names < <(cat "$output_dir"/arr_names.txt)
 rm "$output_dir"/arr_names.txt
 
 ## Remove Warnings from output
 sed -i '0,/^==BEGIN DUMP_ARRAYS==$/d' "$actual"
-printf '%s\n%s\n' "==BEGIN DUMP_ARRAYS==" "$(cat $actual)" >"$actual"
+content_actual=$(cat "$actual")
+printf '%s\n%s\n' "==BEGIN DUMP_ARRAYS==" "$content_actual" >"$actual"
 
 ## Use original array names
 idx=0
 grep "begin dump:" "$actual" | while read -r line; do
+  # shellcheck disable=SC2206
   arr_tmp=($line)
   arr_name=${arr_tmp[2]}
   rep_arr_name=${arr_names[idx]}
