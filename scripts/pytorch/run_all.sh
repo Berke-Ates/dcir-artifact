@@ -37,7 +37,8 @@ benchmarks_dir=$(dirname "$0")/../../benchmarks/pytorch
 benchmarks=$(find "$benchmarks_dir"/* -name 'pytorch.py')
 total=$(echo "$benchmarks" | wc -l)
 
-runners="$runners_dir/pytorch.sh $runners_dir/torch-mlir.sh $runners_dir/dcir.sh"
+runners="$runners_dir/pytorch.sh $runners_dir/pytorch_jit.sh \
+        $runners_dir/torch-mlir.sh $runners_dir/dcir.sh"
 
 for runner in $runners; do
   count=0

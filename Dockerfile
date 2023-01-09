@@ -45,9 +45,6 @@ RUN cmake -G Ninja ../llvm \
   -DLLVM_INSTALL_UTILS=ON && \
   ninja
 
-# Add binaries to PATH
-#  ENV PATH=$HOME/llvm-dcir/usr/local/bin:$PATH
-
 # Build mlir-dace
 WORKDIR $HOME/mlir-dace/build
 
