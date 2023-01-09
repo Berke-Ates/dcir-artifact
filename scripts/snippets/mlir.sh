@@ -75,7 +75,8 @@ compile_with_mlir() {
   # shellcheck disable=SC2086
   cgeist -resource-dir="$(clang-13 -print-resource-dir)" \
     -S --memref-fullrank -O$opt_lvl_cc --raise-scf-to-affine $flags \
-    $additional_flags "$input_chrono" >"$output_dir"/"${output_name}"_cgeist.mlir
+    $additional_flags "$input_chrono" 1>"$output_dir"/"${output_name}"_cgeist.mlir \
+    2>/dev/null
 
   # Optimizing with MLIR
   mlir-opt --affine-loop-invariant-code-motion \
