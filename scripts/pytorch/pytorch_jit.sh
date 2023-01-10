@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Desc: Runs a snippet benchmark using GCC. The output contains any
+# Desc: Runs a pytorch benchmark using Pytorch with JIT. The output contains any
 #       intermediate results and the times in the CSV format
-# Usage: ./gcc.sh <Benchmark File> <Output Dir> <Repetitions>
+# Usage: ./pytorch_jit.sh <Benchmark File> <Output Dir> <Repetitions>
 
 # Be safe
 set -e          # Fail script when subcommand fails
@@ -11,7 +11,7 @@ set -o pipefail # Prevent errors from being masked
 
 # Check args
 if [ $# -ne 3 ]; then
-  echo "Usage: ./gcc.sh <Benchmark File> <Output Dir> <Repetitions>"
+  echo "Usage: ./pytorch_jit.sh <Benchmark File> <Output Dir> <Repetitions>"
   exit 1
 fi
 
@@ -28,18 +28,20 @@ check_tool() {
   fi
 }
 
-check_tool gcc
-check_tool clang
+check_tool python3
 
 # Create output directory
 if [ ! -d "$output_dir" ]; then
   mkdir -p "$output_dir"
 fi
 
+# Silence Python warnings
+export PYTHONWARNINGS="ignore"
+
 # Helpers
-input_name=$(basename "${input_file%.*}")
 input_dir=$(dirname "$input_file")
-input_chrono="$input_dir/$input_name-chrono.c"
+input_name=$(basename "$input_dir")
+input_file=$input_dir/pytorch_jit.py
 timings_file=$output_dir/${input_name}_timings.csv
 touch "$timings_file"
 
@@ -58,36 +60,17 @@ add_csv() {
   csv_line=$((csv_line + 1))
 }
 
-# Flags for the benchmark
-flags="-fPIC -march=native"
-opt_lvl_cc=3 # Optimization level for the control-centric optimizations
-
-# Compile
-# shellcheck disable=SC2086
-gcc -O$opt_lvl_cc $flags -o "$output_dir"/"${input_name}"_gcc.out "$input_chrono" -lm &>/dev/null
-
 # Check output
-# shellcheck disable=SC2086
-clang -O0 $flags -o "$output_dir"/"${input_name}"_clang_ref.out "$input_chrono" -lm &>/dev/null
-
-set +e
-"$output_dir"/"${input_name}"_gcc.out &>/dev/null
-actual=$?
-"$output_dir"/"${input_name}"_clang_ref.out &>/dev/null
-reference=$?
-set -e
-
-if [ "$actual" -ne "$reference" ]; then
+if ! python3 "$input_file" 0 T; then
   echo "Output incorrect!"
   exit 1
 fi
 
 # Running the benchmark
-add_csv "GCC"
+runtimes=$(OMP_NUM_THREADS=1 taskset -c 0 python3 "$input_file" "$repetitions" F)
 
-for _ in $(seq 1 "$repetitions"); do
-  set +e
-  time=$(OMP_NUM_THREADS=1 taskset -c 0 ./"$output_dir"/"${input_name}"_gcc.out)
-  set -e
-  add_csv "$time"
+add_csv "PyTorch (JIT)"
+
+for i in $runtimes; do
+  add_csv "$i"
 done

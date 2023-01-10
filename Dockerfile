@@ -2,7 +2,7 @@
 ### GENERAL SETUP
 ################################################################################
 
-FROM ubuntu:latest as llvm
+FROM ubuntu:22.04 as llvm
 
 # User directory
 ENV USER=user
@@ -10,15 +10,17 @@ ENV HOME=/home/user
 WORKDIR $HOME
 
 # Install dependencies
-RUN apt update -y && \ 
-  apt install -y \
-  wget \
-  git \
-  cmake \
-  ninja-build \
-  clang \
-  lld \
-  python3-pip
+RUN apt-get update -y && \ 
+  apt-get install -y --no-install-recommends \
+  wget=1.21.2-2ubuntu1 \
+  git=1:2.34.1-1ubuntu1.5 \
+  cmake=3.22.1-1ubuntu1.22.04.1 \
+  ninja-build=1.10.1-1 \
+  clang=1:14.0-55~exp2 \
+  lld=1:14.0-55~exp2 \
+  python3-pip=22.0.2+dfsg-1 && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
 
 ################################################################################
 ### Install mlir-dace
@@ -40,36 +42,22 @@ RUN cmake -G Ninja ../llvm \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
   -DLLVM_ENABLE_LLD=ON \
-  -DLLVM_INSTALL_UTILS=ON
-
-RUN ninja
-
-# Install and clear build folder
-RUN mkdir -p $HOME/llvm-dcir
-RUN DESTDIR=$HOME/llvm-dcir ninja install
-
-# Add binaries to PATH
-ENV PATH=$HOME/llvm-dcir/usr/local/bin:$PATH
+  -DLLVM_INSTALL_UTILS=ON && \
+  ninja
 
 # Build mlir-dace
 WORKDIR $HOME/mlir-dace/build
 
 RUN cmake -G Ninja .. \
-  -DMLIR_DIR=$HOME/llvm-dcir/usr/local/lib/cmake/mlir \
-  -DLLVM_EXTERNAL_LIT=$HOME/llvm-dcir/usr/local/bin/llvm-lit \
+  -DMLIR_DIR=$HOME/mlir-dace/llvm-project/build/lib/cmake/mlir \
+  -DLLVM_EXTERNAL_LIT=$HOME/mlir-dace/llvm-project/build/bin/llvm-lit \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
-  -DCMAKE_BUILD_TYPE=Release
-
-RUN ninja
-
-RUN DESTDIR=$HOME/llvm-dcir ninja install
-
-WORKDIR $HOME/bin
-RUN cp $HOME/mlir-dace/build/bin/* .
-
-# Clean up build folders for space
-RUN rm -rf $HOME/mlir-dace $HOME/llvm-dcir
+  -DCMAKE_BUILD_TYPE=Release && \
+  ninja && \
+  mkdir -p $HOME/bin && \
+  cp $HOME/mlir-dace/build/bin/* $HOME/bin && \
+  rm -rf $HOME/mlir-dace
 
 # Go home
 WORKDIR $HOME
@@ -79,8 +67,8 @@ WORKDIR $HOME
 ################################################################################
 
 # Install python dependencies
-RUN pip install --upgrade pip
-RUN pip install --upgrade "jax[cpu]"
+RUN pip install --upgrade --no-cache-dir pip==22.3.1 && \
+  pip install --upgrade --no-cache-dir "jax[cpu]"==0.4.1
 
 # Get MLIR-HLO
 RUN git clone --depth 1 --branch cgo23 https://github.com/Berke-Ates/mlir-hlo.git
@@ -90,10 +78,10 @@ WORKDIR $HOME/mlir-hlo
 RUN git clone https://github.com/llvm/llvm-project.git
 
 WORKDIR $HOME/mlir-hlo/llvm-project
-RUN git checkout $(cat ../build_tools/llvm_version.txt)
+RUN git checkout "$(cat ../build_tools/llvm_version.txt)"
 WORKDIR $HOME/mlir-hlo 
 
-RUN build_tools/build_mlir.sh ${PWD}/llvm-project/ ${PWD}/llvm-build
+RUN build_tools/build_mlir.sh "$PWD"/llvm-project/ "$PWD"/llvm-build
 
 # Build MLIR-HLO
 WORKDIR $HOME/mlir-hlo/build
@@ -102,16 +90,10 @@ RUN cmake .. -GNinja \
   -DLLVM_ENABLE_LLD=ON \
   -DCMAKE_BUILD_TYPE=Release \
   -DLLVM_ENABLE_ASSERTIONS=On \
-  -DMLIR_DIR=${PWD}/../llvm-build/lib/cmake/mlir
-
-RUN DESTDIR=$HOME/llvm-mlir-hlo ninja install
-
-# Copy binaries
-WORKDIR $HOME/bin
-RUN cp $HOME/mlir-hlo/build/bin/mlir-hlo-opt .
-
-# Clean up build folders for space
-RUN rm -rf $HOME/mlir-hlo $HOME/llvm-mlir-hlo
+  -DMLIR_DIR="$PWD"/../llvm-build/lib/cmake/mlir && \
+  ninja && \
+  cp $HOME/mlir-hlo/build/bin/mlir-hlo-opt $HOME/bin && \
+  rm -rf $HOME/mlir-hlo 
 
 # Go home
 WORKDIR $HOME
@@ -134,18 +116,12 @@ RUN cmake -G Ninja ../llvm-project/llvm \
   -DLLVM_EXTERNAL_POLYGEIST_SOURCE_DIR=.. \
   -DLLVM_TARGETS_TO_BUILD="host" \
   -DLLVM_ENABLE_ASSERTIONS=ON \
-  -DCMAKE_BUILD_TYPE=Release
-
-RUN DESTDIR=$HOME/llvm-polygeist ninja install
-
-# Copy binaries
-WORKDIR $HOME/bin
-RUN cp $HOME/llvm-polygeist/usr/local/bin/cgeist .
-RUN cp $HOME/llvm-polygeist/usr/local/bin/mlir-opt .
-RUN cp $HOME/llvm-polygeist/usr/local/bin/mlir-translate .
-
-# Clean up build folders for space
-RUN rm -rf $HOME/Polygeist $HOME/llvm-polygeist
+  -DCMAKE_BUILD_TYPE=Release && \
+  ninja && \
+  cp $HOME/Polygeist/build/bin/cgeist $HOME/bin && \
+  cp $HOME/Polygeist/build/bin/mlir-opt $HOME/bin && \
+  cp $HOME/Polygeist/build/bin/mlir-translate $HOME/bin && \
+  rm -rf $HOME/Polygeist
 
 # Go home
 WORKDIR $HOME
@@ -155,7 +131,7 @@ WORKDIR $HOME
 ################################################################################
 
 # Copy binaries
-FROM ubuntu:latest
+FROM ubuntu:22.04
 
 # User directory
 ENV USER=user
@@ -163,40 +139,49 @@ ENV HOME=/home/user
 WORKDIR $HOME
 
 # Move dotfiles
-RUN mv /root/.bashrc .
-RUN mv /root/.profile .
+RUN mv /root/.bashrc . && mv /root/.profile .
 
 # Make terminal colorful
 ENV TERM=xterm-color
 
 # Install dependencies
-RUN apt update -y && \ 
-  apt install -y \
-  wget \
-  git \
-  clang-13 \
-  lld \
-  python3-pip
+RUN apt-get update -y && \ 
+  apt-get install -y --no-install-recommends \
+  wget=1.21.2-2ubuntu1  \
+  git=1:2.34.1-1ubuntu1.5 \
+  cmake=3.22.1-1ubuntu1.22.04.1 \
+  make=4.3-4.1build1 \
+  ninja-build=1.10.1-1 \
+  clang-13=1:13.0.1-2ubuntu2.1 \
+  gcc=4:11.2.0-1ubuntu1 \
+  lld=1:14.0-55~exp2  \
+  python3-pip=22.0.2+dfsg-1 \
+  python3=3.10.6-1~22.04 \
+  python3-dev=3.10.6-1~22.04 \
+  gpg=2.2.27-3ubuntu2.1 && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
 
 # Launch bash shell at home
-ENTRYPOINT cd $HOME && bash
+ENTRYPOINT ["/bin/bash", "-c"]
+CMD ["cd $HOME && bash"]
 
-# Dependencies for plotting
-RUN pip install --upgrade pip
-RUN pip install --upgrade seaborn
+# Python dependencies
+RUN pip install --upgrade --no-cache-dir pip==22.3.1 && \
+  pip install --upgrade --no-cache-dir seaborn==0.12.2
+
+# Get Polybench comparator
+RUN git clone --depth 1 --branch cgo23 https://github.com/Berke-Ates/polybench-comparator.git
 
 # Copy Binaries
 COPY --from=llvm $HOME/bin $HOME/bin
 
 # Add clang copy
-RUN cp `which clang-13` $HOME/bin/clang
-RUN cp `which clang-13` $HOME/bin/clang++
+RUN cp "$(which clang-13)" $HOME/bin/clang && \ 
+  cp "$(which clang-13)" $HOME/bin/clang++
 
 # Add binaries to PATH
 ENV PATH=$HOME/bin:$PATH
-
-# Get Polybench comparator
-RUN git clone --depth 1 --branch cgo23 https://github.com/Berke-Ates/polybench-comparator.git
 
 ################################################################################
 ### Install torch-mlir
@@ -208,8 +193,9 @@ WORKDIR $HOME/torch-mlir
 RUN git submodule update --init --recursive --depth 1
 
 # Install python dependencies
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install --upgrade --no-cache-dir pip==22.3.1 && \
+  sed -i -e 's/1.14.0.dev20221109/2.0.0.dev20221231/g' pytorch-requirements.txt && \
+  pip install --no-cache-dir -r requirements.txt
 
 # Build torch-mlir in-tree
 WORKDIR $HOME/torch-mlir/build
@@ -230,9 +216,8 @@ RUN cmake -G Ninja ../externals/llvm-project/llvm \
   -DCMAKE_SHARED_LINKER_FLAGS_INIT="-fuse-ld=lld" \
   -DLLVM_INSTALL_UTILS=ON \
   -DLIBTORCH_SRC_BUILD=ON \
-  -DLIBTORCH_VARIANT=shared
-
-RUN ninja
+  -DLIBTORCH_VARIANT=shared && \
+  ninja
 
 # Go home
 WORKDIR $HOME
@@ -246,16 +231,25 @@ ENV PYTHONPATH=$HOME/torch-mlir/build/../examples:$PYTHONPATH
 ### Install ICC
 ################################################################################
 
-RUN wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+RUN wget --progress=dot:giga -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
   | gpg --dearmor \
   | tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
 
 RUN echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/oneapi all main" \
   | tee /etc/apt/sources.list.d/oneAPI.list
 
-RUN apt update -y && apt install -y intel-hpckit
+RUN apt-get update -y && \
+  apt-get install -y --no-install-recommends \
+  intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic=2023.0.0-25370 && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists/*
 
-RUN echo "source /opt/intel/oneapi/compiler/2022.2.1/env/vars.sh" >> $HOME/.bashrc
+RUN echo "source /opt/intel/oneapi/compiler/latest/env/vars.sh" >> $HOME/.bashrc
+
+# Go home
+WORKDIR $HOME
 
 ################################################################################
 ### Install dace
@@ -264,10 +258,11 @@ RUN echo "source /opt/intel/oneapi/compiler/2022.2.1/env/vars.sh" >> $HOME/.bash
 RUN git clone --depth 1 --branch cgo23 https://github.com/Berke-Ates/dace.git
 
 WORKDIR $HOME/dace
-RUN git submodule update --init --recursive --depth 1
+RUN git submodule update --init --recursive --depth 1 && \
+  pip install --no-cache-dir --editable . && \
+  pip install --no-cache-dir mxnet-mkl==1.6.0 numpy==1.23.1
 
-RUN pip install --editable .
-
+# Go home
 WORKDIR $HOME
 
 ################################################################################
