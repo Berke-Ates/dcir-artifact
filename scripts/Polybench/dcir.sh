@@ -174,7 +174,7 @@ set -e
 
 # Running the benchmark
 OMP_NUM_THREADS=1 taskset -c 0 python3 "$current_dir"/bench_dcir.py \
-  "$output_dir"/"${input_name}"_opt.sdfg "$repetitions" F
+  "$output_dir"/"${input_name}"_opt.sdfg "$repetitions" F &>/dev/null
 
 add_csv "DCIR"
 
